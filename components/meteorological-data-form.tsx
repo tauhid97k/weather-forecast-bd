@@ -1,24 +1,39 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useRef } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { cn } from "@/lib/utils"
-import { Thermometer, Droplets, Wind, Eye, Cloud, Clock, BarChart3, Gauge } from "lucide-react"
+import { useState, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
+import {
+  Thermometer,
+  Droplets,
+  Wind,
+  Eye,
+  Cloud,
+  Clock,
+  BarChart3,
+  Gauge,
+} from "lucide-react";
 
 export function MeteorologicalDataForm() {
-  const [formData, setFormData] = useState({})
-  const [activeTab, setActiveTab] = useState("pressure")
+  const [formData, setFormData] = useState({});
+  const [activeTab, setActiveTab] = useState("pressure");
 
   // Refs for multi-box inputs to handle auto-focus
-  const dataTypeRefs = [useRef(null), useRef(null)]
-  const stationNoRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)]
-  const yearRefs = [useRef(null), useRef(null)]
+  const dataTypeRefs = [useRef(null), useRef(null)];
+  const stationNoRefs = [
+    useRef(null),
+    useRef(null),
+    useRef(null),
+    useRef(null),
+    useRef(null),
+  ];
+  const yearRefs = [useRef(null), useRef(null)];
 
   // Tab styles with gradients and more vibrant colors
   const tabStyles = {
@@ -62,31 +77,31 @@ export function MeteorologicalDataForm() {
       card: "bg-gradient-to-br from-fuchsia-50 to-white border-l-4 border-fuchsia-500 shadow-md",
       icon: <Clock className="h-4 w-4 mr-1" />,
     },
-  }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Form submitted:", formData)
+    e.preventDefault();
+    console.log("Form submitted:", formData);
     // Here you would typically send the data to your backend
-  }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   // Handle input for segmented boxes with auto-focus to next box
   const handleSegmentedInput = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number,
     refs: React.RefObject<HTMLInputElement>[],
-    fieldName: string,
+    fieldName: string
   ) => {
-    const { value } = e.target
+    const { value } = e.target;
 
     // Update form data with the specific segment
     setFormData((prev) => ({
@@ -95,13 +110,13 @@ export function MeteorologicalDataForm() {
         ...(prev[fieldName] || {}),
         [index]: value,
       },
-    }))
+    }));
 
     // Auto-focus to next input if value is entered and not the last box
     if (value && index < refs.length - 1) {
-      refs[index + 1].current?.focus()
+      refs[index + 1].current?.focus();
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
@@ -109,7 +124,9 @@ export function MeteorologicalDataForm() {
       <Card className="mb-6 overflow-hidden border-none shadow-lg">
         <div className="absolute " />
         <CardHeader className="relative">
-          <CardTitle className="text-2xl text-center text-black font-bold">First Card</CardTitle>
+          <CardTitle className="text-2xl text-center text-black font-bold">
+            First Card
+          </CardTitle>
         </CardHeader>
         <CardContent className="relative z-10">
           <div className="flex flex-wrap justify-between gap-8">
@@ -126,7 +143,9 @@ export function MeteorologicalDataForm() {
                     ref={dataTypeRefs[i]}
                     className="w-10 text-center p-2 bg-white/90 border-2 shadow-sm focus:ring-2 focus:ring-blue-500"
                     maxLength={1}
-                    onChange={(e) => handleSegmentedInput(e, i, dataTypeRefs, "dataType")}
+                    onChange={(e) =>
+                      handleSegmentedInput(e, i, dataTypeRefs, "dataType")
+                    }
                   />
                 ))}
               </div>
@@ -145,7 +164,9 @@ export function MeteorologicalDataForm() {
                     ref={stationNoRefs[i]}
                     className=" w-10 text-center p-2 bg-white/90 border-2 shadow-sm focus:ring-2 focus:ring-blue-500"
                     maxLength={1}
-                    onChange={(e) => handleSegmentedInput(e, i, stationNoRefs, "stationNo")}
+                    onChange={(e) =>
+                      handleSegmentedInput(e, i, stationNoRefs, "stationNo")
+                    }
                   />
                 ))}
               </div>
@@ -177,7 +198,9 @@ export function MeteorologicalDataForm() {
                     ref={yearRefs[i]}
                     className="w-10 text-center p-2 bg-white/90 border-2 shadow-sm focus:ring-2 focus:ring-blue-500"
                     maxLength={1}
-                    onChange={(e) => handleSegmentedInput(e, i, yearRefs, "year")}
+                    onChange={(e) =>
+                      handleSegmentedInput(e, i, yearRefs, "year")
+                    }
                   />
                 ))}
               </div>
@@ -189,8 +212,13 @@ export function MeteorologicalDataForm() {
       {/*Card Body */}
       <Card className="border-none shadow-xl overflow-hidden">
         <CardContent className="p-6">
-          <Tabs defaultValue="pressure" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 md:grid-cols-8  rounded-xl p-1 gap-1">
+          <Tabs
+            defaultValue="pressure"
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 gap-3 rounded-xl p-1 gap- border-0 bg-transparent">
               {Object.entries(tabStyles).map(([key, style]) => (
                 <TabsTrigger
                   key={key}
@@ -198,19 +226,24 @@ export function MeteorologicalDataForm() {
                   className={cn(
                     "rounded-lg bg-gradient-to-br transition-all duration-300 transform hover:scale-105",
                     style.tab,
-                    activeTab === key ? "ring-2 ring-white ring-offset-1" : "",
+                    activeTab === key ? "ring-2 ring-white ring-offset-1" : ""
                   )}
                 >
                   <div className="flex items-center justify-center">
                     {style.icon}
-                    <span className="hidden md:inline">{key === "V.V" ? "VV" : key}</span>
+                    <span className="hidden md:inline">
+                      {key === "V.V" ? "VV" : key}
+                    </span>
                   </div>
                 </TabsTrigger>
               ))}
             </TabsList>
 
             {/* Bar Pressure Tab */}
-            <TabsContent value="pressure" className="mt-6 transition-all duration-500">
+            <TabsContent
+              value="pressure"
+              className="mt-6 transition-all duration-500"
+            >
               <Card className={cn("overflow-hidden", tabStyles.pressure.card)}>
                 <div className="p-4 bg-gradient-to-r from-rose-500 to-red-600 text-white">
                   <h3 className="text-lg font-semibold flex items-center">
@@ -229,7 +262,9 @@ export function MeteorologicalDataForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="alteredThermometer">Altered Thermometer</Label>
+                    <Label htmlFor="alteredThermometer">
+                      Altered Thermometer
+                    </Label>
                     <Input
                       id="alteredThermometer"
                       name="alteredThermometer"
@@ -249,7 +284,9 @@ export function MeteorologicalDataForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="correctedForIndex">Corrected for Index Temp-gravity(hPa)</Label>
+                    <Label htmlFor="correctedForIndex">
+                      Corrected for Index Temp-gravity(hPa)
+                    </Label>
                     <Input
                       id="correctedForIndex"
                       name="correctedForIndex"
@@ -259,7 +296,9 @@ export function MeteorologicalDataForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="heightDifference">Height Difference Correction(hPa)</Label>
+                    <Label htmlFor="heightDifference">
+                      Height Difference Correction(hPa)
+                    </Label>
                     <Input
                       id="heightDifference"
                       name="heightDifference"
@@ -269,7 +308,9 @@ export function MeteorologicalDataForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="correctionForTemp">Correction for Temp</Label>
+                    <Label htmlFor="correctionForTemp">
+                      Correction for Temp
+                    </Label>
                     <Input
                       id="correctionForTemp"
                       name="correctionForTemp"
@@ -279,7 +320,9 @@ export function MeteorologicalDataForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="stationLevelPressure">Station Level Pressure (P.P.P.P.hpa)</Label>
+                    <Label htmlFor="stationLevelPressure">
+                      Station Level Pressure (P.P.P.P.hpa)
+                    </Label>
                     <Input
                       id="stationLevelPressure"
                       name="stationLevelPressure"
@@ -289,7 +332,9 @@ export function MeteorologicalDataForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="seaLevelReduction">Sea Level Reduction Constant</Label>
+                    <Label htmlFor="seaLevelReduction">
+                      Sea Level Reduction Constant
+                    </Label>
                     <Input
                       id="seaLevelReduction"
                       name="seaLevelReduction"
@@ -299,7 +344,9 @@ export function MeteorologicalDataForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="correctedSeaLevelPressure">Sea-Level Pressure(PPPP)hpa</Label>
+                    <Label htmlFor="correctedSeaLevelPressure">
+                      Sea-Level Pressure(PPPP)hpa
+                    </Label>
                     <Input
                       id="correctedSeaLevelPressure"
                       name="correctedSeaLevelPressure"
@@ -309,7 +356,9 @@ export function MeteorologicalDataForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="afternoonReading">Altimeter setting(QNH)</Label>
+                    <Label htmlFor="afternoonReading">
+                      Altimeter setting(QNH)
+                    </Label>
                     <Input
                       id="afternoonReading"
                       name="afternoonReading"
@@ -319,7 +368,9 @@ export function MeteorologicalDataForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="pressureChange24h">24-Hour Pressure Change</Label>
+                    <Label htmlFor="pressureChange24h">
+                      24-Hour Pressure Change
+                    </Label>
                     <Input
                       id="pressureChange24h"
                       name="pressureChange24h"
@@ -332,8 +383,13 @@ export function MeteorologicalDataForm() {
             </TabsContent>
 
             {/* Temperature Tab */}
-            <TabsContent value="temperature" className="mt-6 transition-all duration-500">
-              <Card className={cn("overflow-hidden", tabStyles.temperature.card)}>
+            <TabsContent
+              value="temperature"
+              className="mt-6 transition-all duration-500"
+            >
+              <Card
+                className={cn("overflow-hidden", tabStyles.temperature.card)}
+              >
                 <div className="p-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
                   <h3 className="text-lg font-semibold flex items-center">
                     <Thermometer className="mr-2" /> Temperature Measurements
@@ -395,7 +451,9 @@ export function MeteorologicalDataForm() {
                     <TabsContent value="corrected" className="mt-4">
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
-                          <Label htmlFor="dryBulbCorrected">Dry-bulb (°C)</Label>
+                          <Label htmlFor="dryBulbCorrected">
+                            Dry-bulb (°C)
+                          </Label>
                           <Input
                             id="dryBulbCorrected"
                             name="dryBulbCorrected"
@@ -405,7 +463,9 @@ export function MeteorologicalDataForm() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="wetBulbCorrected">Wet-bulb (°C)</Label>
+                          <Label htmlFor="wetBulbCorrected">
+                            Wet-bulb (°C)
+                          </Label>
                           <Input
                             id="wetBulbCorrected"
                             name="wetBulbCorrected"
@@ -415,7 +475,9 @@ export function MeteorologicalDataForm() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="maxMinTempCorrected">MAX/MIN (°C)</Label>
+                          <Label htmlFor="maxMinTempCorrected">
+                            MAX/MIN (°C)
+                          </Label>
                           <Input
                             id="maxMinTempCorrected"
                             name="maxMinTempCorrected"
@@ -431,7 +493,10 @@ export function MeteorologicalDataForm() {
             </TabsContent>
 
             {/* TdTdTd Tabs */}
-            <TabsContent value="Td" className="mt-6 transition-all duration-500">
+            <TabsContent
+              value="Td"
+              className="mt-6 transition-all duration-500"
+            >
               <Card className={cn("overflow-hidden", tabStyles.Td.card)}>
                 <div className="p-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white">
                   <h3 className="text-lg font-semibold flex items-center">
@@ -453,7 +518,10 @@ export function MeteorologicalDataForm() {
             </TabsContent>
 
             {/* Humidity Tab */}
-            <TabsContent value="humidity" className="mt-6 transition-all duration-500">
+            <TabsContent
+              value="humidity"
+              className="mt-6 transition-all duration-500"
+            >
               <Card className={cn("overflow-hidden", tabStyles.humidity.card)}>
                 <div className="p-4 bg-gradient-to-r from-violet-500 to-purple-600 text-white">
                   <h3 className="text-lg font-semibold flex items-center">
@@ -462,7 +530,9 @@ export function MeteorologicalDataForm() {
                 </div>
                 <CardContent className="pt-6">
                   <div className="space-y-2">
-                    <Label htmlFor="relativeHumidity">Relative Humidity (%)</Label>
+                    <Label htmlFor="relativeHumidity">
+                      Relative Humidity (%)
+                    </Label>
                     <Input
                       id="relativeHumidity"
                       name="relativeHumidity"
@@ -478,7 +548,10 @@ export function MeteorologicalDataForm() {
             </TabsContent>
 
             {/* Squall Tab */}
-            <TabsContent value="squall" className="mt-6 transition-all duration-500">
+            <TabsContent
+              value="squall"
+              className="mt-6 transition-all duration-500"
+            >
               <Card className={cn("overflow-hidden", tabStyles.squall.card)}>
                 <div className="p-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-white">
                   <h3 className="text-lg font-semibold flex items-center">
@@ -523,7 +596,10 @@ export function MeteorologicalDataForm() {
             </TabsContent>
 
             {/* VV Tab */}
-            <TabsContent value="V.V" className="mt-6 transition-all duration-500">
+            <TabsContent
+              value="V.V"
+              className="mt-6 transition-all duration-500"
+            >
               <Card className={cn("overflow-hidden", tabStyles["V.V"].card)}>
                 <div className="p-4 bg-gradient-to-r from-orange-500 to-amber-600 text-white">
                   <h3 className="text-lg font-semibold flex items-center">
@@ -532,7 +608,9 @@ export function MeteorologicalDataForm() {
                 </div>
                 <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="horizontalVisibility">Horizontal Visibility</Label>
+                    <Label htmlFor="horizontalVisibility">
+                      Horizontal Visibility
+                    </Label>
                     <Input
                       id="horizontalVisibility"
                       name="horizontalVisibility"
@@ -555,7 +633,10 @@ export function MeteorologicalDataForm() {
             </TabsContent>
 
             {/* Weather Tab */}
-            <TabsContent value="weather" className="mt-6 transition-all duration-500">
+            <TabsContent
+              value="weather"
+              className="mt-6 transition-all duration-500"
+            >
               <Card className={cn("overflow-hidden", tabStyles.weather.card)}>
                 <div className="p-4 bg-gradient-to-r from-cyan-500 to-teal-600 text-white">
                   <h3 className="text-lg font-semibold flex items-center">
@@ -600,7 +681,9 @@ export function MeteorologicalDataForm() {
                         {/* W1 Past Weather */}
                         <TabsContent value="w1" className="mt-4">
                           <div className="space-y-2">
-                            <Label htmlFor="pastWeatherW1">Past Weather (W1)</Label>
+                            <Label htmlFor="pastWeatherW1">
+                              Past Weather (W1)
+                            </Label>
                             <Input
                               id="pastWeatherW1"
                               name="pastWeatherW1"
@@ -609,7 +692,8 @@ export function MeteorologicalDataForm() {
                               className="border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
                             />
                             <p className="text-xs text-muted-foreground mt-1">
-                              Weather code for the first part of the observation period
+                              Weather code for the first part of the observation
+                              period
                             </p>
                           </div>
                         </TabsContent>
@@ -617,7 +701,9 @@ export function MeteorologicalDataForm() {
                         {/* W2 Past Weather */}
                         <TabsContent value="w2" className="mt-4">
                           <div className="space-y-2">
-                            <Label htmlFor="pastWeatherW2">Past Weather (W2)</Label>
+                            <Label htmlFor="pastWeatherW2">
+                              Past Weather (W2)
+                            </Label>
                             <Input
                               id="pastWeatherW2"
                               name="pastWeatherW2"
@@ -626,7 +712,8 @@ export function MeteorologicalDataForm() {
                               className="border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
                             />
                             <p className="text-xs text-muted-foreground mt-1">
-                              Weather code for the second part of the observation period
+                              Weather code for the second part of the
+                              observation period
                             </p>
                           </div>
                         </TabsContent>
@@ -648,7 +735,9 @@ export function MeteorologicalDataForm() {
                         {/* WW Present Weather */}
                         <TabsContent value="ww" className="mt-4">
                           <div className="space-y-2">
-                            <Label htmlFor="presentWeatherWW">Present Weather (WW)</Label>
+                            <Label htmlFor="presentWeatherWW">
+                              Present Weather (WW)
+                            </Label>
                             <Input
                               id="presentWeatherWW"
                               name="presentWeatherWW"
@@ -669,8 +758,13 @@ export function MeteorologicalDataForm() {
             </TabsContent>
 
             {/* Indicators Tab */}
-            <TabsContent value="indicators" className="mt-6 transition-all duration-500">
-              <Card className={cn("overflow-hidden", tabStyles.indicators.card)}>
+            <TabsContent
+              value="indicators"
+              className="mt-6 transition-all duration-500"
+            >
+              <Card
+                className={cn("overflow-hidden", tabStyles.indicators.card)}
+              >
                 <div className="p-4 bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white">
                   <h3 className="text-lg font-semibold flex items-center">
                     <Clock className="mr-2" /> Time Indicators
@@ -688,7 +782,9 @@ export function MeteorologicalDataForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="observationTime">GG: Time of Observation (UTC)</Label>
+                    <Label htmlFor="observationTime">
+                      GG: Time of Observation (UTC)
+                    </Label>
                     <Input
                       id="observationTime"
                       name="observationTime"
@@ -720,5 +816,5 @@ export function MeteorologicalDataForm() {
         </CardContent>
       </Card>
     </form>
-  )
+  );
 }
