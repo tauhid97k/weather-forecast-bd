@@ -224,7 +224,7 @@ export function MeteorologicalDataForm() {
                       id="subIndicator"
                       name="subIndicator"
                       onChange={handleChange}
-                      className="transition-all focus:border-rose-500 focus:ring-rose-500/30"
+                      className="border-slate-600 transition-all focus:border-rose-500 focus:ring-rose-500/30"
                     />
                   </div>
 
@@ -234,7 +234,7 @@ export function MeteorologicalDataForm() {
                       id="alteredThermometer"
                       name="alteredThermometer"
                       onChange={handleChange}
-                      className="transition-all focus:border-rose-500 focus:ring-rose-500/30"
+                      className="border-slate-600 transition-all focus:border-rose-500 focus:ring-rose-500/30"
                     />
                   </div>
 
@@ -244,7 +244,7 @@ export function MeteorologicalDataForm() {
                       id="barAsRead"
                       name="barAsRead"
                       onChange={handleChange}
-                      className="transition-all focus:border-rose-500 focus:ring-rose-500/30"
+                      className="border-slate-600 transition-all focus:border-rose-500 focus:ring-rose-500/30"
                     />
                   </div>
 
@@ -254,7 +254,7 @@ export function MeteorologicalDataForm() {
                       id="correctedForIndex"
                       name="correctedForIndex"
                       onChange={handleChange}
-                      className="transition-all focus:border-rose-500 focus:ring-rose-500/30"
+                      className="border-slate-600 transition-all focus:border-rose-500 focus:ring-rose-500/30"
                     />
                   </div>
 
@@ -264,7 +264,7 @@ export function MeteorologicalDataForm() {
                       id="heightDifference"
                       name="heightDifference"
                       onChange={handleChange}
-                      className="transition-all focus:border-rose-500 focus:ring-rose-500/30"
+                      className="border-slate-600 transition-all focus:border-rose-500 focus:ring-rose-500/30"
                     />
                   </div>
 
@@ -274,7 +274,7 @@ export function MeteorologicalDataForm() {
                       id="correctionForTemp"
                       name="correctionForTemp"
                       onChange={handleChange}
-                      className="transition-all focus:border-rose-500 focus:ring-rose-500/30"
+                      className="border-slate-600 transition-all focus:border-rose-500 focus:ring-rose-500/30"
                     />
                   </div>
 
@@ -284,7 +284,7 @@ export function MeteorologicalDataForm() {
                       id="stationLevelPressure"
                       name="stationLevelPressure"
                       onChange={handleChange}
-                      className="transition-all focus:border-rose-500 focus:ring-rose-500/30"
+                      className="border-slate-600 transition-all focus:border-rose-500 focus:ring-rose-500/30"
                     />
                   </div>
 
@@ -294,7 +294,7 @@ export function MeteorologicalDataForm() {
                       id="seaLevelReduction"
                       name="seaLevelReduction"
                       onChange={handleChange}
-                      className="transition-all focus:border-rose-500 focus:ring-rose-500/30"
+                      className="border-slate-600 transition-all focus:border-rose-500 focus:ring-rose-500/30"
                     />
                   </div>
 
@@ -304,7 +304,7 @@ export function MeteorologicalDataForm() {
                       id="correctedSeaLevelPressure"
                       name="correctedSeaLevelPressure"
                       onChange={handleChange}
-                      className="transition-all focus:border-rose-500 focus:ring-rose-500/30"
+                      className="border-slate-600 transition-all focus:border-rose-500 focus:ring-rose-500/30"
                     />
                   </div>
 
@@ -314,7 +314,7 @@ export function MeteorologicalDataForm() {
                       id="afternoonReading"
                       name="afternoonReading"
                       onChange={handleChange}
-                      className="transition-all focus:border-rose-500 focus:ring-rose-500/30"
+                      className="border-slate-600 transition-all focus:border-rose-500 focus:ring-rose-500/30"
                     />
                   </div>
 
@@ -324,7 +324,7 @@ export function MeteorologicalDataForm() {
                       id="pressureChange24h"
                       name="pressureChange24h"
                       onChange={handleChange}
-                      className="transition-all focus:border-rose-500 focus:ring-rose-500/30"
+                      className="border-slate-600 transition-all focus:border-rose-500 focus:ring-rose-500/30"
                     />
                   </div>
                 </CardContent>
@@ -365,7 +365,7 @@ export function MeteorologicalDataForm() {
                             id="dryBulbAsRead"
                             name="dryBulbAsRead"
                             onChange={handleChange}
-                            className="transition-all focus:border-blue-500 focus:ring-blue-500/30"
+                            className="border-slate-600 transition-all focus:border-blue-500 focus:ring-blue-500/30"
                           />
                         </div>
 
@@ -375,7 +375,7 @@ export function MeteorologicalDataForm() {
                             id="wetBulbAsRead"
                             name="wetBulbAsRead"
                             onChange={handleChange}
-                            className="transition-all focus:border-blue-500 focus:ring-blue-500/30"
+                            className=" border-slate-600 transition-all focus:border-blue-500 focus:ring-blue-500/30"
                           />
                         </div>
 
@@ -385,7 +385,7 @@ export function MeteorologicalDataForm() {
                             id="maxMinTempAsRead"
                             name="maxMinTempAsRead"
                             onChange={handleChange}
-                            className="transition-all focus:border-blue-500 focus:ring-blue-500/30"
+                            className="border-slate-600 transition-all focus:border-blue-500 focus:ring-blue-500/30"
                           />
                         </div>
                       </div>
@@ -410,7 +410,7 @@ export function MeteorologicalDataForm() {
                             id="wetBulbCorrected"
                             name="wetBulbCorrected"
                             onChange={handleChange}
-                            className="transition-all focus:border-blue-500 focus:ring-blue-500/30"
+                            className="border-slate-600 transition-all focus:border-blue-500 focus:ring-blue-500/30"
                           />
                         </div>
 
@@ -420,7 +420,7 @@ export function MeteorologicalDataForm() {
                             id="maxMinTempCorrected"
                             name="maxMinTempCorrected"
                             onChange={handleChange}
-                            className="transition-all focus:border-blue-500 focus:ring-blue-500/30"
+                            className="border-slate-600 transition-all focus:border-blue-500 focus:ring-blue-500/30"
                           />
                         </div>
                       </div>
@@ -445,7 +445,7 @@ export function MeteorologicalDataForm() {
                       id="Td"
                       name="Td"
                       onChange={handleChange}
-                      className="transition-all focus:border-emerald-500 focus:ring-emerald-500/30"
+                      className="border-slate-600 transition-all focus:border-emerald-500 focus:ring-emerald-500/30"
                     />
                   </div>
                 </CardContent>
@@ -470,7 +470,7 @@ export function MeteorologicalDataForm() {
                       min="0"
                       max="100"
                       onChange={handleChange}
-                      className="transition-all focus:border-violet-500 focus:ring-violet-500/30"
+                      className="border-slate-600 transition-all focus:border-violet-500 focus:ring-violet-500/30"
                     />
                   </div>
                 </CardContent>
@@ -492,7 +492,7 @@ export function MeteorologicalDataForm() {
                       id="squallForce"
                       name="squallForce"
                       onChange={handleChange}
-                      className="transition-all focus:border-amber-500 focus:ring-amber-500/30"
+                      className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
                     />
                   </div>
 
@@ -505,7 +505,7 @@ export function MeteorologicalDataForm() {
                       min="0"
                       max="360"
                       onChange={handleChange}
-                      className="transition-all focus:border-amber-500 focus:ring-amber-500/30"
+                      className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
                     />
                   </div>
 
@@ -515,7 +515,7 @@ export function MeteorologicalDataForm() {
                       id="squallTime"
                       name="squallTime"
                       onChange={handleChange}
-                      className="transition-all focus:border-amber-500 focus:ring-amber-500/30"
+                      className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
                     />
                   </div>
                 </CardContent>
@@ -537,7 +537,7 @@ export function MeteorologicalDataForm() {
                       id="horizontalVisibility"
                       name="horizontalVisibility"
                       onChange={handleChange}
-                      className="transition-all focus:border-orange-500 focus:ring-orange-500/30"
+                      className="border-slate-600 transition-all focus:border-orange-500 focus:ring-orange-500/30"
                     />
                   </div>
 
@@ -547,7 +547,7 @@ export function MeteorologicalDataForm() {
                       id="miscMeteors"
                       name="miscMeteors"
                       onChange={handleChange}
-                      className="transition-all focus:border-orange-500 focus:ring-orange-500/30"
+                      className="border-slate-600 transition-all focus:border-orange-500 focus:ring-orange-500/30"
                     />
                   </div>
                 </CardContent>
@@ -606,7 +606,7 @@ export function MeteorologicalDataForm() {
                               name="pastWeatherW1"
                               placeholder="Enter past weather code (0-9)"
                               onChange={handleChange}
-                              className="transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
+                              className="border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
                             />
                             <p className="text-xs text-muted-foreground mt-1">
                               Weather code for the first part of the observation period
@@ -623,7 +623,7 @@ export function MeteorologicalDataForm() {
                               name="pastWeatherW2"
                               placeholder="Enter past weather code (0-9)"
                               onChange={handleChange}
-                              className="transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
+                              className="border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
                             />
                             <p className="text-xs text-muted-foreground mt-1">
                               Weather code for the second part of the observation period
@@ -654,7 +654,7 @@ export function MeteorologicalDataForm() {
                               name="presentWeatherWW"
                               placeholder="Enter present weather code (00-99)"
                               onChange={handleChange}
-                              className="transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
+                              className="border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
                             />
                             <p className="text-xs text-muted-foreground mt-1">
                               Current weather conditions at time of observation
@@ -683,7 +683,7 @@ export function MeteorologicalDataForm() {
                       id="c2Indicator"
                       name="c2Indicator"
                       onChange={handleChange}
-                      className="transition-all focus:border-fuchsia-500 focus:ring-fuchsia-500/30"
+                      className="border-slate-600 transition-all focus:border-fuchsia-500 focus:ring-fuchsia-500/30"
                     />
                   </div>
 
@@ -694,7 +694,7 @@ export function MeteorologicalDataForm() {
                       name="observationTime"
                       type="time"
                       onChange={handleChange}
-                      className="transition-all focus:border-fuchsia-500 focus:ring-fuchsia-500/30"
+                      className="border-slate-600 transition-all focus:border-fuchsia-500 focus:ring-fuchsia-500/30"
                     />
                   </div>
                 </CardContent>
@@ -706,7 +706,7 @@ export function MeteorologicalDataForm() {
             <Button
               type="button"
               variant="outline"
-              className="border-slate-300 hover:bg-slate-100 transition-all duration-300"
+              className="border-slate-600 hover:bg-slate-100 transition-all duration-300"
             >
               Reset
             </Button>
