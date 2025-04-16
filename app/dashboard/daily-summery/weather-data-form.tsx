@@ -2,7 +2,7 @@
 
 import { Formik, Form } from "formik"
 import * as Yup from "yup"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs/tabs-summery"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import BasicInfoTab from "./tabs/basic-info-tab"
