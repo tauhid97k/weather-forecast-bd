@@ -43,7 +43,7 @@ export default function WindDirectionTab() {
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold text-cyan-700 flex items-center">
-        <span className="inline-block w-8 h-8 rounded-full bg-cyan-100 text-cyan-700 flex items-center justify-center mr-2">
+        <span className="w-8 h-8 rounded-full bg-cyan-100 text-cyan-700 flex items-center justify-center mr-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"
@@ -98,7 +98,7 @@ export default function WindDirectionTab() {
                       <TableCell></TableCell>
                       <TableCell>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           className={`p-0 h-6 w-6 rounded-full ${values.windDirection === item.direction ? "bg-cyan-500 text-white hover:bg-cyan-600" : "hover:bg-cyan-100"}`}
                           onClick={() => handleSelectDirection(item.direction)}

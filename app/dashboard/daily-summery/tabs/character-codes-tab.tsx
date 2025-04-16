@@ -16,9 +16,9 @@ export default function CharacterCodesTab() {
       range: "72-73",
       groupId: "drizzle",
       items: [
-        { id: "lightDrizzle", label: "Light Drizzle", code: "04" },
-        { id: "modDrizzle", label: "Mod Drizzle", code: "05" },
-        { id: "heavyDrizzle", label: "Heavy Drizzle", code: "06" },
+        { id: "lightDrizzle", label: "Light Drizzle", code: "01" },
+        { id: "modDrizzle", label: "Mod Drizzle", code: "02" },
+        { id: "heavyDrizzle", label: "Heavy Drizzle", code: "03" },
       ],
     },
     {
@@ -26,9 +26,9 @@ export default function CharacterCodesTab() {
       range: "74-75",
       groupId: "contRain",
       items: [
-        { id: "lightContRain", label: "Light Cont. Rain", code: "07" },
-        { id: "modContRain", label: "Mod Con. Rain", code: "08" },
-        { id: "heavyContRain", label: "Heavy Cont. Rain", code: "09" },
+        { id: "lightContRain", label: "Light Cont. Rain", code: "04" },
+        { id: "modContRain", label: "Mod Con. Rain", code: "05" },
+        { id: "heavyContRain", label: "Heavy Cont. Rain", code: "05" },
       ],
     },
     {
@@ -36,9 +36,9 @@ export default function CharacterCodesTab() {
       range: "76-77",
       groupId: "interRain",
       items: [
-        { id: "lightInterRain", label: "Light Inter. Rain", code: "10" },
-        { id: "modInterRain", label: "Mod. Inter. Rain", code: "11" },
-        { id: "heavyInterRain", label: "Heavy Inter. Rain", code: "12" },
+        { id: "lightInterRain", label: "Light Inter. Rain", code: "07" },
+        { id: "modInterRain", label: "Mod. Inter. Rain", code: "08" },
+        { id: "heavyInterRain", label: "Heavy Inter. Rain", code: "09" },
       ],
     },
     {
@@ -46,9 +46,9 @@ export default function CharacterCodesTab() {
       range: "78-80",
       groupId: "shower",
       items: [
-        { id: "lightShower", label: "Light Shower", code: "13" },
-        { id: "modShower", label: "Mod Shower", code: "14" },
-        { id: "heavyShower", label: "Heavy Shower", code: "15" },
+        { id: "lightShower", label: "Light Shower", code: "10" },
+        { id: "modShower", label: "Mod Shower", code: "11" },
+        { id: "heavyShower", label: "Heavy Shower", code: "12" },
       ],
     },
   ]
@@ -56,7 +56,7 @@ export default function CharacterCodesTab() {
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold text-purple-700 flex items-center">
-        <span className="inline-block w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center mr-2">
+        <span className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center mr-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"

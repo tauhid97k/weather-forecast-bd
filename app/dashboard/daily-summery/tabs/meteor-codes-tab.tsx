@@ -24,7 +24,7 @@ export default function MeteorCodesTab() {
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold text-amber-700 flex items-center">
-        <span className="inline-block w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mr-2">
+        <span className="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mr-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"
