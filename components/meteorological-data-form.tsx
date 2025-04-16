@@ -147,58 +147,58 @@ export function MeteorologicalDataForm() {
                 <CardContent className="pt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="space-y-2">
                     <Label htmlFor="subIndicator">1st Card Indicator</Label>
-                    <Input id="subIndicator" name="subIndicator" onChange={handleChange} />
+                    <Input className="border-2" id="subIndicator" name="subIndicator" onChange={handleChange} />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="alteredThermometer">Altered Thermometer</Label>
-                    <Input id="alteredThermometer" name="alteredThermometer" onChange={handleChange} />
+                    <Input className="border-2" id="alteredThermometer" name="alteredThermometer" onChange={handleChange} />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="barAsRead">Bar As Read(hPa)</Label>
-                    <Input id="barAsRead" name="barAsRead" onChange={handleChange} />
+                    <Input className="border-2" id="barAsRead" name="barAsRead" onChange={handleChange} />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="correctedForIndex">Corrected for Index Temp-gravity(hPa)</Label>
-                    <Input id="correctedForIndex" name="correctedForIndex" onChange={handleChange} />
+                    <Input className="border-2" id="correctedForIndex" name="correctedForIndex" onChange={handleChange} />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="heightDifference">Height Difference Correction(hPa)</Label>
-                    <Input id="heightDifference" name="heightDifference" onChange={handleChange} />
+                    <Input className="border-2" id="heightDifference" name="heightDifference" onChange={handleChange} />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="correctionForTemp">Correction for Temp</Label>
-                    <Input id="correctionForTemp" name="correctionForTemp" onChange={handleChange} />
+                    <Input className="border-2" id="correctionForTemp" name="correctionForTemp" onChange={handleChange} />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="stationLevelPressure">Station Level Pressure (P.P.P.P.hpa)</Label>
-                    <Input id="stationLevelPressure" name="stationLevelPressure" onChange={handleChange} />
+                    <Input className="border-2" id="stationLevelPressure" name="stationLevelPressure" onChange={handleChange} />
                   </div>
 
 
                   <div className="space-y-2">
                     <Label htmlFor="seaLevelReduction">Sea Level Reduction Constant</Label>
-                    <Input id="seaLevelReduction" name="seaLevelReduction" onChange={handleChange} />
+                    <Input className="border-2" id="seaLevelReduction" name="seaLevelReduction" onChange={handleChange} />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="correctedSeaLevelPressure">Sea-Level Pressure(PPPP)hpa</Label>
-                    <Input id="correctedSeaLevelPressure" name="correctedSeaLevelPressure" onChange={handleChange} />
+                    <Input className="border-2" id="correctedSeaLevelPressure" name="correctedSeaLevelPressure" onChange={handleChange} />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="afternoonReading">Altimeter setting(QNH)</Label>
-                    <Input id="afternoonReading" name="afternoonReading" onChange={handleChange} />
+                    <Input className="border-2" id="afternoonReading" name="afternoonReading" onChange={handleChange} />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="pressureChange24h">24-Hour Pressure Change</Label>
-                    <Input id="pressureChange24h" name="pressureChange24h" onChange={handleChange} />
+                    <Input className="border-2" id="pressureChange24h" name="pressureChange24h" onChange={handleChange} />
                   </div>
                 </CardContent>
               </Card>
@@ -219,17 +219,17 @@ export function MeteorologicalDataForm() {
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="dryBulbAsRead">Dry-bulb (°C)</Label>
-                          <Input id="dryBulbAsRead" name="dryBulbAsRead" onChange={handleChange} />
+                          <Input className="border-2" id="dryBulbAsRead" name="dryBulbAsRead" onChange={handleChange} />
                         </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="wetBulbAsRead">Wet-bulb (°C)</Label>
-                          <Input id="wetBulbAsRead" name="wetBulbAsRead" onChange={handleChange} />
+                          <Input className="border-2" id="wetBulbAsRead" name="wetBulbAsRead" onChange={handleChange} />
                         </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="maxMinTempAsRead">MAX/MIN (°C)</Label>
-                          <Input id="maxMinTempAsRead" name="maxMinTempAsRead" onChange={handleChange} />
+                          <Input className="border-2" id="maxMinTempAsRead" name="maxMinTempAsRead" onChange={handleChange} />
                         </div>
                       </div>
                     </TabsContent>
@@ -239,17 +239,17 @@ export function MeteorologicalDataForm() {
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="dryBulbCorrected">Dry-bulb (°C)</Label>
-                          <Input id="dryBulbCorrected" name="dryBulbCorrected" onChange={handleChange} />
+                          <Input className="border-2" id="dryBulbCorrected" name="dryBulbCorrected" onChange={handleChange} />
                         </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="wetBulbCorrected">Wet-bulb (°C)</Label>
-                          <Input id="wetBulbCorrected" name="wetBulbCorrected" onChange={handleChange} />
+                          <Input className="border-2" id="wetBulbCorrected" name="wetBulbCorrected" onChange={handleChange} />
                         </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="maxMinTempCorrected">MAX/MIN (°C)</Label>
-                          <Input id="maxMinTempCorrected" name="maxMinTempCorrected" onChange={handleChange} />
+                          <Input className="border-2" id="maxMinTempCorrected" name="maxMinTempCorrected" onChange={handleChange} />
                         </div>
 
                       </div>
@@ -266,6 +266,7 @@ export function MeteorologicalDataForm() {
                   <div className="space-y-2">
                     <Label htmlFor="relativeHumidity">Relative Humidity (%)</Label>
                     <Input
+                    className="border-2"
                       id="relativeHumidity"
                       name="relativeHumidity"
                       type="number"
@@ -283,7 +284,7 @@ export function MeteorologicalDataForm() {
                 <CardContent className="pt-6">
                 <div className="space-y-2">
                     <Label htmlFor="Td">Dew-Point Temprrature (&deg;C)</Label>
-                    <Input id="Td" name="Td" onChange={handleChange} />
+                    <Input className="border-2" id="Td" name="Td" onChange={handleChange} />
                   </div>
                 </CardContent>
               </Card>
@@ -295,12 +296,13 @@ export function MeteorologicalDataForm() {
                 <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="squallForce">Force (KTS)</Label>
-                    <Input id="squallForce" name="squallForce" onChange={handleChange} />
+                    <Input className="border-2" id="squallForce" name="squallForce" onChange={handleChange} />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="squallDirection">Direction (°d)</Label>
                     <Input
+                    className="border-2"
                       id="squallDirection"
                       name="squallDirection"
                       type="number"
@@ -312,7 +314,7 @@ export function MeteorologicalDataForm() {
 
                   <div className="space-y-2">
                     <Label htmlFor="squallTime">Time (qt)</Label>
-                    <Input id="squallTime" name="squallTime" onChange={handleChange} />
+                    <Input className="border-2" id="squallTime" name="squallTime" onChange={handleChange} />
                   </div>
 
                   
@@ -325,12 +327,12 @@ export function MeteorologicalDataForm() {
                 <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="horizontalVisibility">Horizontal Visibility</Label>
-                    <Input id="horizontalVisibility" name="horizontalVisibility" onChange={handleChange} />
+                    <Input className="border-2" id="horizontalVisibility" name="horizontalVisibility" onChange={handleChange} />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="miscMeteors">Misc Meteors(Code)</Label>
-                    <Input id="miscMeteors" name="miscMeteors" onChange={handleChange} />
+                    <Input className="border-2" id="miscMeteors" name="miscMeteors" onChange={handleChange} />
                   </div>
                 </CardContent>
               </Card>
@@ -359,6 +361,7 @@ export function MeteorologicalDataForm() {
                           <div className="space-y-2">
                             <Label htmlFor="pastWeatherW1">Past Weather (W1)</Label>
                             <Input
+                            className="border-2"
                               id="pastWeatherW1"
                               name="pastWeatherW1"
                               placeholder="Enter past weather code (0-9)"
@@ -375,6 +378,7 @@ export function MeteorologicalDataForm() {
                           <div className="space-y-2">
                             <Label htmlFor="pastWeatherW2">Past Weather (W2)</Label>
                             <Input
+                            className="border-2"
                               id="pastWeatherW2"
                               name="pastWeatherW2"
                               placeholder="Enter past weather code (0-9)"
@@ -400,6 +404,7 @@ export function MeteorologicalDataForm() {
                           <div className="space-y-2">
                             <Label htmlFor="presentWeatherWW">Present Weather (WW)</Label>
                             <Input
+                            className="border-2"
                               id="presentWeatherWW"
                               name="presentWeatherWW"
                               placeholder="Enter present weather code (00-99)"
@@ -423,12 +428,12 @@ export function MeteorologicalDataForm() {
                 <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="c2Indicator">C2: 2nd Card Indicator</Label>
-                    <Input id="c2Indicator" name="c2Indicator" onChange={handleChange} />
+                    <Input className="border-2" id="c2Indicator" name="c2Indicator" onChange={handleChange} />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="observationTime">GG: Time of Observation (UTC)</Label>
-                    <Input id="observationTime" name="observationTime" type="time" onChange={handleChange} />
+                    <Input className="border-2" id="observationTime" name="observationTime" type="time" onChange={handleChange} />
                   </div>
                 </CardContent>
               </Card>
