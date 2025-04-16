@@ -2,7 +2,7 @@
 
 import { Formik, Form } from "formik"
 import * as Yup from "yup"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs/tabs-summery"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import BasicInfoTab from "./tabs/basic-info-tab"
@@ -50,7 +50,7 @@ export default function WeatherDataForm() {
         <Form>
           <Card className="shadow-lg border-t-4 border-t-blue-500">
             <Tabs defaultValue="basic-info" className="w-full">
-              <TabsList className="w-full p-0 h-auto bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
+              <TabsList className="w-full mx-6 p-0 h-auto bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
                 <TabsTrigger
                   value="basic-info"
                   className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-none flex-1 py-3 text-sm font-medium"
