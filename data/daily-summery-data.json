@@ -1,0 +1,46 @@
+[
+  {
+    "dataType": "10",
+    "stationNo": "12345",
+    "year": "25",
+    "month": "04",
+    "day": "17",
+    "measurements": [
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10"
+    ],
+    "meteorCodes": [
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10"
+    ],
+    "characterCodes": {
+      "drizzle": "modDrizzle",
+      "contRain": "modContRain",
+      "interRain": "modInterRain",
+      "shower": "modShower"
+    },
+    "windDirection": "SSW",
+    "windTime": "",
+    "submittedAt": "2025-04-17T10:24:40.519Z"
+  }
+]
