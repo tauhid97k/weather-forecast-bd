@@ -1,60 +1,53 @@
-import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-import { v4 as uuidv4 } from "uuid";
+import { type NextRequest, NextResponse } from "next/server"
+import { promises as fs } from "fs"
+import path from "path"
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const FILE_PATH = path.join(
-  DATA_DIR,
-  "/app/dashboard/second-card/data/observations.json"
-);
-
-interface Observation {
-  id: string;
-  timestamp: string;
-  [key: string]: any;
-}
-
-function initializeDataFile() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-  if (!fs.existsSync(FILE_PATH)) {
-    fs.writeFileSync(FILE_PATH, JSON.stringify([], null, 2));
-  }
-}
-
-export async function POST(req: Request) {
-  initializeDataFile();
-
+export async function POST(request: NextRequest) {
   try {
-    const data = await req.json();
-    const newObservation: Observation = {
-      id: uuidv4(),
-      ...data,
-      timestamp: new Date().toISOString(),
-    };
+    // Parse the JSON data from the request
+    const data = await request.json()
 
-    let existingData: Observation[] = [];
+    // Create data directory if it doesn't exist
+    const dataDir = path.join(process.cwd(), "data")
     try {
-      existingData = JSON.parse(fs.readFileSync(FILE_PATH, "utf-8"));
+      await fs.access(dataDir)
     } catch (error) {
-      console.error("Error reading existing data:", error);
-      existingData = [];
+      await fs.mkdir(dataDir, { recursive: true })
     }
 
-    existingData.push(newObservation);
-    fs.writeFileSync(FILE_PATH, JSON.stringify(existingData, null, 2));
+    // Generate a unique filename with timestamp
+    const now = new Date()
+    const dateString = now.toISOString().split("T")[0]
+    const timeString = now.toTimeString().split(" ")[0].replace(/:/g, "-")
+    const filename = `weather-observation_${dateString}_${timeString}.json`
 
-    return NextResponse.json(
-      { success: true, data: newObservation },
-      { status: 201 }
-    );
+    // Add metadata to the data
+    const dataWithMetadata = {
+      ...data,
+      metadata: {
+        createdAt: now.toISOString(),
+        filename: filename,
+      },
+    }
+
+    // Write the file
+    const filePath = path.join(dataDir, filename)
+    await fs.writeFile(filePath, JSON.stringify(dataWithMetadata, null, 2))
+
+    return NextResponse.json({
+      success: true,
+      message: "Weather observation saved successfully!",
+      filePath: `/data/${filename}`,
+      filename: filename,
+    })
   } catch (error) {
-    console.error("Error saving observation:", error);
+    console.error("Error saving weather observation:", error)
     return NextResponse.json(
-      { success: false, error: "Failed to save observation" },
-      { status: 500 }
-    );
+      {
+        success: false,
+        error: "Failed to save weather observation data",
+      },
+      { status: 500 },
+    )
   }
 }

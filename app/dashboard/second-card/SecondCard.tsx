@@ -1,114 +1,70 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import {
-  CloudIcon,
-  CloudRainIcon,
-  Wind,
-  User,
-  Sun,
-  AlertTriangle,
-  Loader2,
-} from "lucide-react";
-import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { CloudIcon, CloudRainIcon, Wind, User, Sun, Loader2 } from "lucide-react"
+import { useState } from "react"
+import { toast, Toaster } from "sonner"
 
 export default function WeatherObservationForm() {
-  const [notification, setNotification] = useState({
-    show: false,
-    message: "",
-    isError: false,
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState("cloud");
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [activeTab, setActiveTab] = useState("cloud")
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+    e.preventDefault()
+    setIsSubmitting(true)
 
     try {
-      const formData = new FormData(e.target as HTMLFormElement);
-      const formObject: Record<string, string> = {};
+      const formData = new FormData(e.target as HTMLFormElement)
+      const formObject: Record<string, string> = {}
 
       // Convert FormData to a plain object
       formData.forEach((value, key) => {
-        formObject[key] = value.toString();
-      });
+        formObject[key] = value.toString()
+      })
 
-      const response = await fetch("/api/observations", {
+      // Add timestamp to the data
+      formObject.timestamp = new Date().toISOString()
+
+      const response = await fetch("/api/save-observation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formObject),
-      });
+      })
 
-      const result = await response.json();
+      const result = await response.json()
 
       if (response.ok) {
-        setNotification({
-          show: true,
-          message: "Weather observation submitted successfully!",
-          isError: false,
-        });
+        toast.success("Weather observation submitted successfully!")
         // Reset form
-        (e.target as HTMLFormElement).reset();
+        ;(e.target as HTMLFormElement).reset()
       } else {
-        throw new Error(result.error || "Failed to submit observation");
+        throw new Error(result.error || "Failed to submit observation")
       }
     } catch (error) {
-      setNotification({
-        show: true,
-        message: error instanceof Error ? error.message : "Submission failed",
-        isError: true,
-      });
+      toast.error(error instanceof Error ? error.message : "Submission failed")
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <div className="w-full flex flex-col">
-      {notification.show && (
-        <div
-          className={`p-4 flex items-center gap-2 ${
-            notification.isError
-              ? "bg-red-100 text-red-700"
-              : "bg-green-100 text-green-700"
-          }`}
-        >
-          {notification.isError ? (
-            <AlertTriangle className="h-5 w-5" />
-          ) : (
-            <CloudIcon className="h-5 w-5" />
-          )}
-          <p>{notification.message}</p>
-          <button
-            className="ml-auto text-sm font-medium"
-            onClick={() => setNotification({ ...notification, show: false })}
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
+      <Toaster position="top-right" richColors />
 
       <div className="text-center p-4">
         <h1 className="text-2xl font-bold">Weather Observation System</h1>
-        <p className="text-gray-600">
-          Record meteorological data with precision
-        </p>
+        <p className="text-gray-600">Record meteorological data with precision</p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col flex-grow">
         <div className="flex-grow overflow-auto p-4">
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="flex flex-wrap mb-4 w-full justify-between">
               <TabsTrigger
                 value="cloud"
@@ -212,13 +168,8 @@ export default function WeatherObservationForm() {
                 <CardContent>
                   <div className="grid gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="total-cloud-amount">
-                        Total Cloud Amount (Octa)
-                      </Label>
-                      <Input
-                        id="total-cloud-amount"
-                        name="total-cloud-amount"
-                      />
+                      <Label htmlFor="total-cloud-amount">Total Cloud Amount (Octa)</Label>
+                      <Input id="total-cloud-amount" name="total-cloud-amount" />
                     </div>
                   </div>
                 </CardContent>
@@ -226,10 +177,7 @@ export default function WeatherObservationForm() {
             </TabsContent>
 
             {/* SIGNIFICANT CLOUD Tab Content */}
-            <TabsContent
-              value="significant-cloud"
-              className="h-full overflow-auto"
-            >
+            <TabsContent value="significant-cloud" className="h-full overflow-auto">
               <Card className="h-full">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -298,33 +246,23 @@ export default function WeatherObservationForm() {
                 <CardContent>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
-                      <Label htmlFor="time-start">
-                        Time of Start (HH:MM UTC)
-                      </Label>
+                      <Label htmlFor="time-start">Time of Start (HH:MM UTC)</Label>
                       <Input id="time-start" name="time-start" />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="time-end">
-                        Time of Ending (HH:MM UTC)
-                      </Label>
+                      <Label htmlFor="time-end">Time of Ending (HH:MM UTC)</Label>
                       <Input id="time-end" name="time-end" />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="since-previous">
-                        Since Previous Observation
-                      </Label>
+                      <Label htmlFor="since-previous">Since Previous Observation</Label>
                       <Input id="since-previous" name="since-previous" />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="during-previous">
-                        During Previous 6 Hours (At 00, 06, 12, 18 UTC)
-                      </Label>
+                      <Label htmlFor="during-previous">During Previous 6 Hours (At 00, 06, 12, 18 UTC)</Label>
                       <Input id="during-previous" name="during-previous" />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="last-24-hours">
-                        Last 24 Hours Precipitation
-                      </Label>
+                      <Label htmlFor="last-24-hours">Last 24 Hours Precipitation</Label>
                       <Input id="last-24-hours" name="last-24-hours" />
                     </div>
                   </div>
@@ -344,15 +282,11 @@ export default function WeatherObservationForm() {
                 <CardContent>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
-                      <Label htmlFor="first-anemometer">
-                        1st Anemometer Reading
-                      </Label>
+                      <Label htmlFor="first-anemometer">1st Anemometer Reading</Label>
                       <Input id="first-anemometer" name="first-anemometer" />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="second-anemometer">
-                        2nd Anemometer Reading
-                      </Label>
+                      <Label htmlFor="second-anemometer">2nd Anemometer Reading</Label>
                       <Input id="second-anemometer" name="second-anemometer" />
                     </div>
                     <div className="grid gap-2">
@@ -380,20 +314,12 @@ export default function WeatherObservationForm() {
                 <CardContent>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
-                      <Label htmlFor="observer-initial">
-                        Initial of Observer
-                      </Label>
+                      <Label htmlFor="observer-initial">Initial of Observer</Label>
                       <Input id="observer-initial" name="observer-initial" />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="observation-time">
-                        Time of Observation (UTC)
-                      </Label>
-                      <Input
-                        id="observation-time"
-                        name="observation-time"
-                        type="datetime-local"
-                      />
+                      <Label htmlFor="observation-time">Time of Observation (UTC)</Label>
+                      <Input id="observation-time" name="observation-time" type="datetime-local" />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="station-id">Station ID</Label>
@@ -406,12 +332,8 @@ export default function WeatherObservationForm() {
           </Tabs>
         </div>
 
-        <div className="p-4 flex justify-end">
-          <Button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white"
-            disabled={isSubmitting}
-          >
+        <div className="p-4 flex justify-end gap-2">
+          <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -427,11 +349,11 @@ export default function WeatherObservationForm() {
         </div>
       </form>
     </div>
-  );
+  )
 }
 
 function CloudLevelInputs({ title }: { title: string }) {
-  const prefix = title.toLowerCase().replace(/\s+/g, "-");
+  const prefix = title.toLowerCase().replace(/\s+/g, "-")
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -453,11 +375,11 @@ function CloudLevelInputs({ title }: { title: string }) {
         <Input id={`${prefix}-amount`} name={`${prefix}-amount`} />
       </div>
     </div>
-  );
+  )
 }
 
 function SignificantCloudLayer({ title }: { title: string }) {
-  const prefix = title.toLowerCase().replace(/\s+/g, "-");
+  const prefix = title.toLowerCase().replace(/\s+/g, "-")
 
   return (
     <div>
@@ -477,5 +399,5 @@ function SignificantCloudLayer({ title }: { title: string }) {
         </div>
       </div>
     </div>
-  );
+  )
 }

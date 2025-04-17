@@ -1,4 +1,6 @@
-import { MeteorologicalDataForm } from "@/components/meteorological-data-form"
+// import { MeteorologicalDataForm } from "@/app/dashboard/first-card/meteorological-data-form"
+import { MeteorologicalDataForm } from '@/app/dashboard/first-card/meteorological-data-form';
+// import { MeteorologicalDataForm } from '@/app/dashboard/first-card/meteorological-data-form';
 
 export default function Home() {
   return (
