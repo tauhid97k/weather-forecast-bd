@@ -34,8 +34,8 @@ export default function MapControls({
         className="mb-4"
       >
         <div className="flex items-center space-x-2">
-          <RadioGroupItem value="Nepal" id="nepal" />
-          <Label htmlFor="nepal">Nepal</Label>
+          <RadioGroupItem value="bangladesh" id="bangladesh" />
+          <Label htmlFor="bangladesh">Bangladesh</Label>
         </div>
         <div className="flex items-center space-x-2 relative">
           <RadioGroupItem value="Province" id="province" />
@@ -68,9 +68,9 @@ export default function MapControls({
                 <SelectValue placeholder="District" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Jumla">Jumla</SelectItem>
-                <SelectItem value="Kathmandu">Kathmandu</SelectItem>
-                <SelectItem value="Pokhara">Pokhara</SelectItem>
+                <SelectItem value="Jumla">Dhaka</SelectItem>
+                <SelectItem value="Kathmandu">Chittagong</SelectItem>
+                <SelectItem value="Pokhara">Sylhet</SelectItem>
               </SelectContent>
             </Select>
           </Label>
