@@ -118,3 +118,134 @@ export default function MapControls({
     </div>
   );
 }
+
+
+
+
+// "use client"
+
+// import { Button } from "@/components/ui/button"
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuLabel,
+//   DropdownMenuSeparator,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu"
+// import { ChevronsUpDown, Check } from "lucide-react"
+
+// const districts = [
+//   { id: "dhaka", name: "Dhaka" },
+//   { id: "chittagong", name: "Chittagong" },
+//   { id: "khulna", name: "Khulna" },
+//   { id: "rajshahi", name: "Rajshahi" },
+//   { id: "sylhet", name: "Sylhet" },
+//   { id: "barisal", name: "Barisal" },
+//   { id: "rangpur", name: "Rangpur" },
+//   { id: "mymensingh", name: "Mymensingh" },
+// ]
+
+// const layers = ["Temperature", "Rainfall", "Wind", "Condition"]
+
+// const conditions = ["sunny", "partly-cloudy", "cloudy", "rain", "heavy-rain", "thunderstorm"]
+
+// export default function MapControls({
+//   selectedDistrict,
+//   setSelectedDistrict,
+//   currentDate,
+//   setCurrentDate,
+//   isPlaying,
+//   setIsPlaying,
+//   selectedLayer,
+//   setSelectedLayer,
+//   weatherData,
+//   filteredConditions = [], // Add default empty array
+//   setFilteredConditions,
+//   zoomToDistrict,
+// }) {
+//   const dates = ["18-Oct", "19-Nov", "19-Dec", "19-Jan", "19-Feb", "19-Mar", "19-Apr", "19-May", "19-Jun"]
+
+//   // Add a safety check for the condition filter buttons
+//   const handleConditionToggle = (condition) => {
+//     if (!filteredConditions) {
+//       // Initialize with all conditions except the one being toggled
+//       setFilteredConditions(conditions.filter((c) => c !== condition))
+//     } else if (filteredConditions.includes(condition)) {
+//       setFilteredConditions(filteredConditions.filter((c) => c !== condition))
+//     } else {
+//       setFilteredConditions([...filteredConditions, condition])
+//     }
+//   }
+
+//   return (
+//     <div className="bg-white p-3 rounded shadow w-full">
+//       <h3 className="font-bold text-lg mb-2 text-center">Map Controls</h3>
+
+//       {/* District Selection */}
+//       <DropdownMenu>
+//         <DropdownMenuTrigger asChild>
+//           <Button variant="outline" className="w-full justify-between">
+//             {selectedDistrict ? selectedDistrict.name : "Select District"}
+//             <ChevronsUpDown className="ml-2 h-4 w-4" />
+//           </Button>
+//         </DropdownMenuTrigger>
+//         <DropdownMenuContent className="w-56">
+//           <DropdownMenuLabel>Select a district</DropdownMenuLabel>
+//           <DropdownMenuSeparator />
+//           {districts.map((district) => (
+//             <DropdownMenuItem
+//               key={district.id}
+//               onSelect={() => {
+//                 setSelectedDistrict(district)
+//                 zoomToDistrict(district)
+//               }}
+//             >
+//               {district.name}
+//               {selectedDistrict?.id === district.id && <Check className="ml-auto h-4 w-4" />}
+//             </DropdownMenuItem>
+//           ))}
+//           <DropdownMenuSeparator />
+//           <DropdownMenuItem onSelect={() => setSelectedDistrict(null)}>Clear Selection</DropdownMenuItem>
+//         </DropdownMenuContent>
+//       </DropdownMenu>
+
+//       {/* Layer Selection */}
+//       <DropdownMenu>
+//         <DropdownMenuTrigger asChild>
+//           <Button variant="outline" className="w-full justify-between">
+//             {selectedLayer || "Select Layer"}
+//             <ChevronsUpDown className="ml-2 h-4 w-4" />
+//           </Button>
+//         </DropdownMenuTrigger>
+//         <DropdownMenuContent className="w-56">
+//           <DropdownMenuLabel>Select a layer</DropdownMenuLabel>
+//           <DropdownMenuSeparator />
+//           {layers.map((layer) => (
+//             <DropdownMenuItem key={layer} onSelect={() => setSelectedLayer(layer)}>
+//               {layer}
+//               {selectedLayer === layer && <Check className="ml-auto h-4 w-4" />}
+//             </DropdownMenuItem>
+//           ))}
+//         </DropdownMenuContent>
+//       </DropdownMenu>
+
+//       {/* Condition Filters */}
+//       <div className="mt-3">
+//         <h4 className="font-semibold mb-1">Filter Conditions</h4>
+//         <div className="flex flex-wrap gap-2">
+//           {conditions.map((condition) => (
+//             <Button
+//               key={condition}
+//               variant={filteredConditions && filteredConditions.includes(condition) ? "default" : "outline"}
+//               size="sm"
+//               onClick={() => handleConditionToggle(condition)}
+//             >
+//               {condition}
+//             </Button>
+//           ))}
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }

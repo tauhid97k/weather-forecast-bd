@@ -33,6 +33,7 @@ export default function DroughtDashboard() {
               selectedIndex={selectedIndex}
               setSelectedIndex={setSelectedIndex}
             />
+              {/* <MapComponent /> */}
           </div>
           <div className="bg-white rounded-lg shadow">
             <div className="p-4">
