@@ -67,9 +67,9 @@ const DemoMapWithDivision = () => {
       <MapContainer
         center={mapCenter}
         zoom={8}
-        style={{ height: "500px", width: "100%" }}
-        className={isLoading ? "opacity-50 pointer-events-none" : ""}
+        style={{ height: "600px", width: "100%" }}
         ref={mapRef}
+        className={isLoading ? "opacity-50 pointer-events-none" : ""} // Optionally reduce opacity and disable interaction
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -91,7 +91,7 @@ const DemoMapWithDivision = () => {
           ))}
 
         {isLoading && (
-          <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
+          <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-100 bg-opacity-25 z-10">
             <Loader2 className="animate-spin w-10 h-10 text-blue-500" />
           </div>
         )}

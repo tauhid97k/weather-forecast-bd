@@ -25,6 +25,7 @@ import {
 import L from "leaflet";
 import { Loader2 } from "lucide-react";
 import { useDivision } from "@/contexts/divisionContext";
+import { cn } from "@/lib/utils";
 
 // More detailed Bangladesh districts with proper boundaries
 const bangladeshDistricts = {
@@ -1128,12 +1129,11 @@ export default function MapComponent() {
         </div>
       </div>
 
-      <div className="relative w-full">
+      <div className={cn("relative")}>
         <MapContainer
           center={mapCenter}
           zoom={8}
           style={{ height: "600px", width: "100%" }}
-          className={isLoading ? "opacity-50 pointer-events-none" : ""}
           ref={mapRef}
         >
           <FixLeafletIcons />

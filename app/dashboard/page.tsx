@@ -9,9 +9,8 @@ import SoilMoistureChart from "@/components/charts/soil-moisture-chart";
 import TemperatureChart from "@/components/charts/temperature-chart";
 
 export default function DroughtDashboard() {
-  const [selectedRegion, setSelectedRegion] = useState("Nepal");
-  const [selectedProvince, setSelectedProvince] = useState("Province1");
-  const [selectedDistrict, setSelectedDistrict] = useState("Jumla");
+  const [selectedRegion, setSelectedRegion] = useState("Bangladesh");
+  const [selectedDistrict, setSelectedDistrict] = useState("Dhaka");
   const [selectedPeriod, setSelectedPeriod] = useState("1 Month");
   const [selectedIndex, setSelectedIndex] = useState("Rainfall");
   const [currentDate, setCurrentDate] = useState("19-Mar");
@@ -24,8 +23,6 @@ export default function DroughtDashboard() {
             <MapControls
               selectedRegion={selectedRegion}
               setSelectedRegion={setSelectedRegion}
-              selectedProvince={selectedProvince}
-              setSelectedProvince={setSelectedProvince}
               selectedDistrict={selectedDistrict}
               setSelectedDistrict={setSelectedDistrict}
               selectedPeriod={selectedPeriod}
@@ -33,7 +30,7 @@ export default function DroughtDashboard() {
               selectedIndex={selectedIndex}
               setSelectedIndex={setSelectedIndex}
             />
-              {/* <MapComponent /> */}
+            {/* <MapComponent /> */}
           </div>
           <div className="bg-white rounded-lg shadow">
             <div className="p-4">

@@ -14,8 +14,6 @@ import { useDivision } from "@/contexts/divisionContext"; // Assuming your conte
 export default function MapControls({
   selectedRegion,
   setSelectedRegion,
-  selectedProvince,
-  setSelectedProvince,
   selectedDistrict,
   setSelectedDistrict,
   selectedPeriod,
@@ -25,7 +23,7 @@ export default function MapControls({
 }) {
   const { divisions, setSelectedDivision } = useDivision();
 
-  const handleDistrictChange = (value: string) => {
+  const handleDivisionChange = (value: string) => {
     const foundDivision = divisions.find((div) => div.name === value);
     setSelectedDistrict(value); // Update local selectedDistrict state if needed
     if (foundDivision) {
@@ -51,11 +49,15 @@ export default function MapControls({
           <Label htmlFor="bangladesh">Bangladesh</Label>
         </div>
         <div className="flex items-center space-x-2">
-          <RadioGroupItem value="District" id="district" />
+          <RadioGroupItem
+            checked={selectedDistrict}
+            value="district"
+            id="district"
+          />
           <Label htmlFor="district">
             <Select
               value={selectedDistrict}
-              onValueChange={handleDistrictChange}
+              onValueChange={handleDivisionChange}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Division" />
