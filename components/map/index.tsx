@@ -27,8 +27,780 @@ import { Loader2 } from "lucide-react";
 import { useLocation } from "@/contexts/divisionContext";
 import { cn } from "@/lib/utils";
 
-// More detailed Bangladesh districts with proper boundaries
-const bangladeshDistricts = {
+// Type definitions
+type WeatherCondition =
+  | "sunny"
+  | "partly-cloudy"
+  | "cloudy"
+  | "rain"
+  | "heavy-rain"
+  | "thunderstorm";
+
+type WeatherData = {
+  temp: number;
+  rainfall: number;
+  humidity: number;
+  windSpeed: number;
+  condition: WeatherCondition;
+};
+
+type DistrictFeature = {
+  type: string;
+  properties: {
+    name: string;
+    id: string;
+  };
+  geometry: {
+    type: string;
+    coordinates: number[][][];
+  };
+};
+
+type DistrictFeatureCollection = {
+  type: string;
+  features: DistrictFeature[];
+};
+
+type DateWeatherData = {
+  [district: string]: WeatherData;
+};
+
+type WeatherDataMap = {
+  [date: string]: DateWeatherData;
+};
+
+// Constants
+const ZOOM_LEVELS = {
+  country: 7,
+  division: 8,
+  district: 10,
+  upazila: 12,
+};
+
+const BANGLADESH_BOUNDS: L.LatLngBoundsLiteral = [
+  [20.5, 88.0], // Southwest corner
+  [26.5, 92.5], // Northeast corner
+];
+
+const weatherIcons: Record<WeatherCondition, string> = {
+  sunny: "☀️",
+  "partly-cloudy": "⛅",
+  cloudy: "☁️",
+  rain: "🌧️",
+  "heavy-rain": "⛈️",
+  thunderstorm: "🌩️",
+};
+
+const weatherColors: Record<WeatherCondition, string> = {
+  sunny: "#FFD700",
+  "partly-cloudy": "#87CEEB",
+  cloudy: "#708090",
+  rain: "#4682B4",
+  "heavy-rain": "#4169E1",
+  thunderstorm: "#483D8B",
+};
+
+const dates = [
+  "18-Oct",
+  "19-Nov",
+  "19-Dec",
+  "19-Jan",
+  "19-Feb",
+  "19-Mar",
+  "19-Apr",
+  "19-May",
+  "19-Jun",
+];
+
+// Fix for Leaflet icons in SSR/Next.js
+function FixLeafletIcons() {
+  useEffect(() => {
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl:
+        "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+      iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+      shadowUrl:
+        "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+    });
+  }, []);
+
+  return null;
+}
+
+// Custom zoom control buttons
+function CustomZoomControl() {
+  const map = useMap();
+
+  const handleZoomIn = () => {
+    map.zoomIn();
+  };
+
+  const handleZoomOut = () => {
+    map.zoomOut();
+  };
+
+  return (
+    <div className="absolute top-2 left-2 flex flex-col gap-1 z-[1000]">
+      <Button
+        size="icon"
+        variant="secondary"
+        onClick={handleZoomIn}
+        className="h-8 w-8 bg-white"
+      >
+        <Plus className="h-4 w-4" />
+      </Button>
+      <Button
+        size="icon"
+        variant="secondary"
+        onClick={handleZoomOut}
+        className="h-8 w-8 bg-white"
+      >
+        <Minus className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+}
+
+// Create a custom weather marker for each district
+function createWeatherMarker(
+  map: L.Map,
+  feature: DistrictFeature,
+  currentDate: string
+): L.Marker | null {
+  const id = feature.properties.id;
+  const name = feature.properties.name;
+  const coords = feature.geometry.coordinates[0];
+
+  // Skip if no weather data for this district
+  if (!weatherData[currentDate][id]) {
+    console.warn(`No weather data for ${id} on ${currentDate}`);
+    return null;
+  }
+
+  // Calculate center of the district
+  const lat = coords.reduce((sum, point) => sum + point[1], 0) / coords.length;
+  const lng = coords.reduce((sum, point) => sum + point[0], 0) / coords.length;
+
+  // Get weather data for this district
+  const data = weatherData[currentDate][id];
+
+  // Create a custom div for the weather marker
+  const weatherIcon = document.createElement("div");
+  weatherIcon.className = "weather-marker";
+  weatherIcon.innerHTML = `
+    <div class="weather-icon" style="font-size: 24px; text-align: center;">${
+      weatherIcons[data.condition]
+    }</div>
+    <div class="weather-temp" style="font-weight: bold; text-align: center;">${
+      data.temp
+    }°C</div>
+  `;
+
+  // Create a custom icon
+  const customIcon = L.divIcon({
+    html: weatherIcon,
+    className: "weather-div-icon",
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+  });
+
+  // Create marker with the custom icon
+  const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+
+  // Add popup with detailed weather info
+  marker.bindPopup(`
+    <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 5px;">${name}</div>
+    <div style="font-size: 24px; text-align: center; margin-bottom: 5px;">${
+      weatherIcons[data.condition]
+    }</div>
+    <div style="font-weight: bold; text-align: center; font-size: 18px; margin-bottom: 10px;">${
+      data.temp
+    }°C</div>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+      <span>Rainfall:</span>
+      <span>${data.rainfall} mm</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+      <span>Humidity:</span>
+      <span>${data.humidity}%</span>
+    </div>
+    <div style="display: flex; justify-content: space-between;">
+      <span>Wind:</span>
+      <span>${data.windSpeed} km/h</span>
+    </div>
+  `);
+
+  return marker;
+}
+
+// Dynamic Weather Map component
+function DynamicWeatherMap({ currentDate }: { currentDate: string }) {
+  const map = useMap();
+  const markersRef = useRef<L.Marker[]>([]);
+  const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+
+  // Style function for GeoJSON features
+  const style = (feature: DistrictFeature) => {
+    const id = feature.properties.id;
+    const isSelected = selectedDistrict === id;
+    const data = weatherData[currentDate][id];
+
+    if (!data) {
+      return {
+        fillColor: "#cccccc",
+        weight: isSelected ? 3 : 1,
+        opacity: 1,
+        color: isSelected ? "#000" : "white",
+        dashArray: isSelected ? "" : "3",
+        fillOpacity: isSelected ? 0.7 : 0.5,
+      };
+    }
+
+    return {
+      fillColor: weatherColors[data.condition],
+      weight: isSelected ? 3 : 1,
+      opacity: 1,
+      color: isSelected ? "#000" : "white",
+      dashArray: isSelected ? "" : "3",
+      fillOpacity: isSelected ? 0.7 : 0.5,
+    };
+  };
+
+  // Handle district click
+  const zoomToFeature = (e: L.LeafletMouseEvent) => {
+    const layer = e.target;
+    const id = layer.feature.properties.id;
+
+    if (selectedDistrict === id) {
+      setSelectedDistrict(null);
+      map.fitBounds(geoJsonLayerRef.current?.getBounds() as L.LatLngBounds);
+    } else {
+      setSelectedDistrict(id);
+      map.fitBounds(layer.getBounds(), {
+        padding: [50, 50],
+        maxZoom: 10,
+        animate: true,
+        duration: 1,
+      });
+    }
+  };
+
+  // Add click handler
+  const onEachFeature = (feature: DistrictFeature, layer: L.Layer) => {
+    layer.on({
+      click: zoomToFeature,
+    });
+  };
+
+  useEffect(() => {
+    // Remove previous markers
+    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current = [];
+
+    // Remove previous GeoJSON layer
+    if (geoJsonLayerRef.current) {
+      geoJsonLayerRef.current.remove();
+    }
+
+    // Add new GeoJSON layer with updated styles
+    geoJsonLayerRef.current = L.geoJSON(bangladeshDistricts as any, {
+      style: style,
+      onEachFeature: onEachFeature,
+    }).addTo(map);
+
+    // Add weather markers for each district
+    bangladeshDistricts.features.forEach((feature) => {
+      const marker = createWeatherMarker(map, feature, currentDate);
+      if (marker) {
+        markersRef.current.push(marker);
+      }
+    });
+
+    // Fit bounds to the GeoJSON
+    map.fitBounds(geoJsonLayerRef.current.getBounds());
+
+    // Reset selected district when date changes
+    setSelectedDistrict(null);
+
+    return () => {
+      markersRef.current.forEach((marker) => marker.remove());
+      if (geoJsonLayerRef.current) {
+        geoJsonLayerRef.current.remove();
+      }
+    };
+  }, [map, currentDate]);
+
+  // Update styles when selected district changes
+  useEffect(() => {
+    if (geoJsonLayerRef.current) {
+      geoJsonLayerRef.current.setStyle(style);
+    }
+  }, [selectedDistrict]);
+
+  return null;
+}
+
+// Weather legend component
+function WeatherLegend() {
+  return (
+    <div className="absolute bottom-16 right-2 bg-white p-2 rounded shadow z-[1000] w-48">
+      <h4 className="font-bold mb-1 text-center">Weather Conditions</h4>
+      {Object.entries(weatherIcons).map(([condition, icon]) => (
+        <div key={condition} className="flex items-center gap-2 text-xs mb-1">
+          <div className="text-lg">{icon}</div>
+          <div className="capitalize">{condition.replace("-", " ")}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Reset View Button component
+function ResetViewButton() {
+  const map = useMap();
+  const { selectedDivision, selectedDistrict, selectedUpazila } = useLocation();
+
+  const handleResetView = () => {
+    if (selectedUpazila) {
+      // Zoom to upazila
+      map.setView(selectedUpazila.coordinates, ZOOM_LEVELS.upazila, {
+        animate: true,
+        duration: 1,
+      });
+    } else if (selectedDistrict) {
+      // Zoom to district
+      map.setView(selectedDistrict.coordinates, ZOOM_LEVELS.district, {
+        animate: true,
+        duration: 1,
+      });
+    } else if (selectedDivision) {
+      // Zoom to division
+      map.setView(selectedDivision.coordinates, ZOOM_LEVELS.division, {
+        animate: true,
+        duration: 1,
+      });
+    } else {
+      // Zoom to country
+      map.fitBounds(BANGLADESH_BOUNDS, {
+        animate: true,
+        duration: 1,
+      });
+    }
+  };
+
+  return (
+    <div className="absolute top-12 left-2 z-[1000]">
+      <Button
+        size="sm"
+        variant="secondary"
+        onClick={handleResetView}
+        className="bg-white"
+      >
+        Reset View
+      </Button>
+    </div>
+  );
+}
+
+// Main component
+export default function MapComponent() {
+  const [currentDate, setCurrentDate] = useState(dates[0]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(
+    new Date().toLocaleTimeString()
+  );
+
+  const mapRef = useRef<L.Map | null>(null);
+  const animationRef = useRef<NodeJS.Timeout | null>(null);
+
+  const { selectedDivision, selectedDistrict, selectedUpazila, loading } =
+    useLocation();
+
+  const [divisionBoundary, setDivisionBoundary] = useState<
+    L.LatLngExpression[][]
+  >([]);
+  const [districtBoundary, setDistrictBoundary] = useState<
+    L.LatLngExpression[][]
+  >([]);
+  const [upazilaBoundary, setUpazilaBoundary] = useState<
+    L.LatLngExpression[][]
+  >([]);
+
+  const [mapCenter, setMapCenter] = useState<L.LatLngExpression>([
+    23.685, 90.3563,
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Define zoomToLocation function
+  const zoomToLocation = useCallback(
+    (
+      coordinates: L.LatLngExpression,
+      boundary: L.LatLngExpression[][],
+      level: keyof typeof ZOOM_LEVELS
+    ) => {
+      if (mapRef.current) {
+        if (boundary.length > 0) {
+          const polygon = L.polygon(boundary);
+          mapRef.current.fitBounds(polygon.getBounds(), {
+            padding: [50, 50],
+            maxZoom: ZOOM_LEVELS[level],
+            animate: true,
+            duration: 1,
+          });
+        } else {
+          mapRef.current.setView(coordinates, ZOOM_LEVELS[level], {
+            animate: true,
+            duration: 1,
+          });
+        }
+      }
+    },
+    []
+  );
+
+  const fetchBoundary = useCallback(
+    async (osmId: number, type: "division" | "district" | "upazila") => {
+      setIsLoading(true);
+      try {
+        const apiUrl = `https://polygons.openstreetmap.fr/get_geojson.py?id=${osmId}&params=0`;
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        let coordinates: L.LatLngExpression[][] = [];
+
+        if (data?.type === "MultiPolygon") {
+          coordinates = data.coordinates.map((polygon: number[][][]) =>
+            polygon[0].map((coord: number[]) => [coord[1], coord[0]])
+          );
+        } else if (data?.type === "Polygon") {
+          coordinates = [
+            data.coordinates[0].map((coord: number[]) => [coord[1], coord[0]]),
+          ];
+        } else {
+          console.error("Boundary data format not recognized:", data);
+          coordinates = [];
+        }
+
+        switch (type) {
+          case "division":
+            setDivisionBoundary(coordinates);
+            break;
+          case "district":
+            setDistrictBoundary(coordinates);
+            break;
+          case "upazila":
+            setUpazilaBoundary(coordinates);
+            break;
+        }
+      } catch (error) {
+        console.error(`Failed to fetch ${type} boundary:`, error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (selectedUpazila) {
+      setIsLoading(true);
+      setMapCenter(selectedUpazila.coordinates);
+      fetchBoundary(selectedUpazila.osmId, "upazila").then(() => {
+        zoomToLocation(selectedUpazila.coordinates, upazilaBoundary, "upazila");
+      });
+    } else if (selectedDistrict) {
+      setIsLoading(true);
+      setMapCenter(selectedDistrict.coordinates);
+      fetchBoundary(selectedDistrict.osmId, "district").then(() => {
+        zoomToLocation(
+          selectedDistrict.coordinates,
+          districtBoundary,
+          "district"
+        );
+      });
+    } else if (selectedDivision) {
+      setIsLoading(true);
+      setMapCenter(selectedDivision.coordinates);
+      fetchBoundary(selectedDivision.osmId, "division").then(() => {
+        zoomToLocation(
+          selectedDivision.coordinates,
+          divisionBoundary,
+          "division"
+        );
+      });
+    } else {
+      if (mapRef.current) {
+        mapRef.current.fitBounds(BANGLADESH_BOUNDS);
+      }
+    }
+  }, [
+    selectedDivision,
+    selectedDistrict,
+    selectedUpazila,
+    divisionBoundary,
+    districtBoundary,
+    upazilaBoundary,
+    fetchBoundary,
+    zoomToLocation,
+  ]);
+
+  const dateIndex = dates.indexOf(currentDate);
+
+  const handleDateChange = (value: number[]) => {
+    setCurrentDate(dates[value[0]]);
+  };
+
+  // Toggle play/pause animation
+  const togglePlay = () => {
+    setIsPlaying(!isPlaying);
+  };
+
+  // Animation effect
+  useEffect(() => {
+    if (isPlaying) {
+      let currentIndex = dateIndex;
+
+      animationRef.current = setInterval(() => {
+        currentIndex = (currentIndex + 1) % dates.length;
+        setCurrentDate(dates[currentIndex]);
+      }, 1500); // Change every 1.5 seconds
+    } else if (animationRef.current) {
+      clearInterval(animationRef.current);
+    }
+
+    return () => {
+      if (animationRef.current) {
+        clearInterval(animationRef.current);
+      }
+    };
+  }, [isPlaying, dateIndex]);
+
+  // Update current time every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 60000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Get current weather summary for the selected date
+  const getWeatherSummary = (date: string) => {
+    const allDistricts = Object.values(weatherData[date]);
+    const avgTemp = Math.round(
+      allDistricts.reduce((sum, d) => sum + d.temp, 0) / allDistricts.length
+    );
+    const maxTemp = Math.max(...allDistricts.map((d) => d.temp));
+    const minTemp = Math.min(...allDistricts.map((d) => d.temp));
+    const totalRainfall = allDistricts.reduce((sum, d) => sum + d.rainfall, 0);
+    const avgRainfall = Math.round(totalRainfall / allDistricts.length);
+
+    // Count conditions to find most common
+    const conditionCounts: Record<string, number> = {};
+    allDistricts.forEach((d) => {
+      conditionCounts[d.condition] = (conditionCounts[d.condition] || 0) + 1;
+    });
+
+    const mostCommonCondition = Object.entries(conditionCounts).sort(
+      (a, b) => b[1] - a[1]
+    )[0][0] as WeatherCondition;
+
+    return {
+      avgTemp,
+      maxTemp,
+      minTemp,
+      avgRainfall,
+      mostCommonCondition,
+      icon: weatherIcons[mostCommonCondition],
+    };
+  };
+
+  const weatherSummary = getWeatherSummary(currentDate);
+
+  return (
+    <div className="relative h-[600px] bg-gray-100 rounded-lg overflow-hidden">
+      {/* BBC-style header */}
+      <div className="absolute top-0 left-0 right-0 bg-[#0f0f0f] text-white z-[1001] flex items-center justify-between px-4 py-2">
+        <div className="flex items-center gap-2">
+          <div className="font-bold text-lg">Bangladesh Weather</div>
+          <div className="text-sm text-gray-300 flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            <span>Updated: {currentTime}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1">
+            <Thermometer className="h-4 w-4 text-red-400" />
+            <span>{weatherSummary.avgTemp}°C</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Droplets className="h-4 w-4 text-blue-400" />
+            <span>{weatherSummary.avgRainfall} mm</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Wind className="h-4 w-4 text-gray-400" />
+            <span>12 km/h</span>
+          </div>
+        </div>
+      </div>
+
+      <div className={cn("relative")}>
+        <MapContainer
+          center={mapCenter}
+          zoom={8}
+          style={{ height: "600px", width: "100%" }}
+          ref={mapRef}
+        >
+          <FixLeafletIcons />
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+
+          {/* Render administrative boundaries based on selection */}
+          {selectedDivision && !selectedDistrict && !selectedUpazila && (
+            <>
+              <Marker position={selectedDivision.coordinates}>
+                <Popup>{selectedDivision.name} Division</Popup>
+              </Marker>
+              {divisionBoundary.length > 0 &&
+                divisionBoundary.map((polygon, index) => (
+                  <Polygon
+                    key={`div-${index}`}
+                    positions={polygon}
+                    color="blue"
+                    fillOpacity={0.1}
+                  />
+                ))}
+            </>
+          )}
+
+          {selectedDistrict && !selectedUpazila && (
+            <>
+              <Marker position={selectedDistrict.coordinates}>
+                <Popup>{selectedDistrict.name} District</Popup>
+              </Marker>
+              {districtBoundary.length > 0 &&
+                districtBoundary.map((polygon, index) => (
+                  <Polygon
+                    key={`dist-${index}`}
+                    positions={polygon}
+                    color="green"
+                    fillOpacity={0.1}
+                  />
+                ))}
+            </>
+          )}
+
+          {selectedUpazila && (
+            <>
+              <Marker position={selectedUpazila.coordinates}>
+                <Popup>{selectedUpazila.name} Upazila</Popup>
+              </Marker>
+              {upazilaBoundary.length > 0 &&
+                upazilaBoundary.map((polygon, index) => (
+                  <Polygon
+                    key={`upa-${index}`}
+                    positions={polygon}
+                    color="red"
+                    fillOpacity={0.1}
+                  />
+                ))}
+            </>
+          )}
+
+          {isLoading && (
+            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
+              <Loader2 className="animate-spin w-10 h-10 text-blue-500" />
+            </div>
+          )}
+
+          {/* Only show weather data when viewing Bangladesh or division level */}
+          {(!selectedDivision || !selectedDistrict) && (
+            <DynamicWeatherMap currentDate={currentDate} />
+          )}
+
+          <CustomZoomControl />
+          <ResetViewButton />
+        </MapContainer>
+      </div>
+
+      {/* Weather summary panel */}
+      <div className="absolute top-14 right-2 bg-white p-3 rounded shadow z-[1000] w-64">
+        <h3 className="font-bold text-lg mb-2">Weather Summary</h3>
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-4xl">{weatherSummary.icon}</div>
+          <div className="text-2xl font-bold">{weatherSummary.avgTemp}°C</div>
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="flex items-center gap-1">
+            <Thermometer className="h-4 w-4 text-red-500" />
+            <span>High: {weatherSummary.maxTemp}°C</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Thermometer className="h-4 w-4 text-blue-500" />
+            <span>Low: {weatherSummary.minTemp}°C</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Droplets className="h-4 w-4 text-blue-500" />
+            <span>Rainfall: {weatherSummary.avgRainfall} mm</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Wind className="h-4 w-4 text-gray-500" />
+            <span>Wind: 12 km/h</span>
+          </div>
+        </div>
+        <div className="mt-3 text-sm text-gray-600 capitalize">
+          {weatherSummary.mostCommonCondition.replace("-", " ")} conditions
+          across most areas
+        </div>
+      </div>
+
+      <WeatherLegend />
+
+      {/* Timeline controls */}
+      <div className="absolute bottom-2 left-2 right-2 flex items-center gap-2 bg-white p-2 rounded shadow z-[1000]">
+        <div className="w-16">{dates[0]}</div>
+        <Button
+          size="icon"
+          variant="outline"
+          className="h-6 w-6"
+          onClick={togglePlay}
+        >
+          {isPlaying ? (
+            <Pause className="h-3 w-3" />
+          ) : (
+            <Play className="h-3 w-3" />
+          )}
+        </Button>
+        <div className="w-16">{dates[dates.length - 1]}</div>
+        <div className="flex-1 px-4">
+          <Slider
+            value={[dateIndex]}
+            max={dates.length - 1}
+            step={1}
+            onValueChange={handleDateChange}
+          />
+        </div>
+        <div className="w-16 text-center">{currentDate}</div>
+      </div>
+
+      {/* BBC-style footer */}
+      <div className="absolute bottom-14 left-2 right-2 max-w-sm mx-auto bg-amber-100/90 font-semibold p-2 rounded shadow z-[1000] text-xs text-center">
+        Weather data is simulated for demonstration purposes. Click on districts
+        to zoom in and see detailed weather information.
+      </div>
+    </div>
+  );
+}
+
+// Data (move to separate file if preferred)
+const bangladeshDistricts: DistrictFeatureCollection = {
   type: "FeatureCollection",
   features: [
     {
@@ -143,11 +915,27 @@ const bangladeshDistricts = {
         ],
       },
     },
+    {
+      type: "Feature",
+      properties: { name: "Dhaka", id: "dhaka" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [90.3, 23.7],
+            [90.5, 23.7],
+            [90.5, 23.9],
+            [90.3, 23.9],
+            [90.3, 23.7],
+          ],
+        ],
+      },
+    },
   ],
 };
 
 // Weather data for each district and date
-const weatherData = {
+const weatherData: WeatherDataMap = {
   "18-Oct": {
     dhaka: {
       temp: 28,
@@ -671,648 +1459,3 @@ const weatherData = {
     },
   },
 };
-
-const weatherIcons = {
-  sunny: "☀️",
-  "partly-cloudy": "⛅",
-  cloudy: "☁️",
-  rain: "🌧️",
-  "heavy-rain": "⛈️",
-  thunderstorm: "🌩️",
-};
-
-// Weather condition colors
-const weatherColors = {
-  sunny: "#FFD700",
-  "partly-cloudy": "#87CEEB",
-  cloudy: "#708090",
-  rain: "#4682B4",
-  "heavy-rain": "#4169E1",
-  thunderstorm: "#483D8B",
-};
-
-// Fix for Leaflet icons in SSR/Next.js
-function FixLeafletIcons() {
-  useEffect(() => {
-    delete L.Icon.Default.prototype._getIconUrl;
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl:
-        "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-      iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-      shadowUrl:
-        "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-    });
-  }, []);
-
-  return null;
-}
-
-// Custom zoom control buttons
-function CustomZoomControl() {
-  const map = useMap();
-
-  const handleZoomIn = () => {
-    map.zoomIn();
-  };
-
-  const handleZoomOut = () => {
-    map.zoomOut();
-  };
-
-  return (
-    <div className="absolute top-2 left-2 flex flex-col gap-1 z-[1000]">
-      <Button
-        size="icon"
-        variant="secondary"
-        onClick={handleZoomIn}
-        className="h-8 w-8 bg-white"
-      >
-        <Plus className="h-4 w-4" />
-      </Button>
-      <Button
-        size="icon"
-        variant="secondary"
-        onClick={handleZoomOut}
-        className="h-8 w-8 bg-white"
-      >
-        <Minus className="h-4 w-4" />
-      </Button>
-    </div>
-  );
-}
-
-// Create a custom weather marker for each district
-function createWeatherMarker(map, feature, currentDate) {
-  const id = feature.properties.id;
-  const name = feature.properties.name;
-  const coords = feature.geometry.coordinates[0];
-
-  // Calculate center of the district
-  const lat = coords.reduce((sum, point) => sum + point[1], 0) / coords.length;
-  const lng = coords.reduce((sum, point) => sum + point[0], 0) / coords.length;
-
-  // Get weather data for this district
-  const data = weatherData[currentDate][id];
-
-  // Create a custom div for the weather marker
-  const weatherIcon = document.createElement("div");
-  weatherIcon.className = "weather-marker";
-  weatherIcon.innerHTML = `
-    <div class="weather-icon" style="font-size: 24px; text-align: center;">${
-      weatherIcons[data.condition]
-    }</div>
-    <div class="weather-temp" style="font-weight: bold; text-align: center;">${
-      data.temp
-    }°C</div>
-  `;
-
-  // Create a custom icon
-  const customIcon = L.divIcon({
-    html: weatherIcon,
-    className: "weather-div-icon",
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
-  });
-
-  // Create marker with the custom icon
-  const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
-
-  // Add popup with detailed weather info
-  marker.bindPopup(`
-    <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 5px;">${name}</div>
-    <div style="font-size: 24px; text-align: center; margin-bottom: 5px;">${
-      weatherIcons[data.condition]
-    }</div>
-    <div style="font-weight: bold; text-align: center; font-size: 18px; margin-bottom: 10px;">${
-      data.temp
-    }°C</div>
-    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-      <span>Rainfall:</span>
-      <span>${data.rainfall} mm</span>
-    </div>
-    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-      <span>Humidity:</span>
-      <span>${data.humidity}%</span>
-    </div>
-    <div style="display: flex; justify-content: space-between;">
-      <span>Wind:</span>
-      <span>${data.windSpeed} km/h</span>
-    </div>
-  `);
-
-  return marker;
-}
-
-// Dynamic Weather Map component
-function DynamicWeatherMap({ currentDate }) {
-  const map = useMap();
-  const markersRef = useRef([]);
-  const geoJsonLayerRef = useRef(null);
-  const [selectedDistrict, setSelectedDistrict] = useState(null);
-
-  // Style function for GeoJSON features
-  const style = (feature) => {
-    const id = feature.properties.id;
-    const isSelected = selectedDistrict === id;
-    const data = weatherData[currentDate][id];
-
-    return {
-      fillColor: weatherColors[data.condition],
-      weight: isSelected ? 3 : 1,
-      opacity: 1,
-      color: isSelected ? "#000" : "white",
-      dashArray: isSelected ? "" : "3",
-      fillOpacity: isSelected ? 0.7 : 0.5,
-    };
-  };
-
-  // Handle district click - zoom to the clicked district
-  const zoomToFeature = (e) => {
-    const layer = e.target;
-    const id = layer.feature.properties.id;
-
-    // Toggle selection - if already selected, zoom out to full view
-    if (selectedDistrict === id) {
-      setSelectedDistrict(null);
-      map.fitBounds(geoJsonLayerRef.current.getBounds());
-    } else {
-      setSelectedDistrict(id);
-      map.fitBounds(layer.getBounds(), {
-        padding: [50, 50],
-        maxZoom: 50,
-        animate: true,
-        duration: 1,
-      });
-    }
-  };
-
-  // Add click handler
-  const onEachFeature = (feature, layer) => {
-    layer.on({
-      click: zoomToFeature,
-    });
-  };
-
-  useEffect(() => {
-    // Remove previous markers
-    markersRef.current.forEach((marker) => marker.remove());
-    markersRef.current = [];
-
-    // Remove previous GeoJSON layer
-    if (geoJsonLayerRef.current) {
-      geoJsonLayerRef.current.remove();
-    }
-
-    // Add new GeoJSON layer with updated styles
-    geoJsonLayerRef.current = L.geoJSON(bangladeshDistricts, {
-      style: style,
-      onEachFeature: onEachFeature,
-    }).addTo(map);
-
-    // Add weather markers for each district
-    bangladeshDistricts.features.forEach((feature) => {
-      const marker = createWeatherMarker(map, feature, currentDate);
-      markersRef.current.push(marker);
-    });
-
-    // Fit bounds to the GeoJSON
-    map.fitBounds(geoJsonLayerRef.current.getBounds());
-
-    // Reset selected district when date changes
-    setSelectedDistrict(null);
-
-    return () => {
-      markersRef.current.forEach((marker) => marker.remove());
-      if (geoJsonLayerRef.current) {
-        geoJsonLayerRef.current.remove();
-      }
-    };
-  }, [map, currentDate]);
-
-  // Update styles when selected district changes
-  useEffect(() => {
-    if (geoJsonLayerRef.current) {
-      geoJsonLayerRef.current.setStyle(style);
-    }
-  }, [selectedDistrict]);
-
-  return null;
-}
-
-// Reset view button
-function ResetViewButton() {
-  const map = useMap();
-
-  const handleResetView = () => {
-    // Get all GeoJSON layers
-    const layers = [];
-    map.eachLayer((layer) => {
-      if (layer instanceof L.GeoJSON) {
-        layers.push(layer);
-      }
-    });
-
-    // If there are GeoJSON layers, fit to their bounds
-    if (layers.length > 0) {
-      map.fitBounds(layers[0].getBounds());
-    }
-  };
-
-  return (
-    <div className="absolute top-12 left-2 z-[1000]">
-      <Button
-        size="sm"
-        variant="secondary"
-        onClick={handleResetView}
-        className="bg-white"
-      >
-        Reset View
-      </Button>
-    </div>
-  );
-}
-
-// Weather legend component
-function WeatherLegend() {
-  return (
-    <div className="absolute bottom-16 right-2 bg-white p-2 rounded shadow z-[1000] w-48">
-      <h4 className="font-bold mb-1 text-center">Weather Conditions</h4>
-      {Object.entries(weatherIcons).map(([condition, icon]) => (
-        <div key={condition} className="flex items-center gap-2 text-xs mb-1">
-          <div className="text-lg">{icon}</div>
-          <div className="capitalize">{condition.replace("-", " ")}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-const dates = [
-  "18-Oct",
-  "19-Nov",
-  "19-Dec",
-  "19-Jan",
-  "19-Feb",
-  "19-Mar",
-  "19-Apr",
-  "19-May",
-  "19-Jun",
-];
-
-// Main component
-export default function MapComponent() {
-  const [currentDate, setCurrentDate] = useState("18-Oct");
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(
-    new Date().toLocaleTimeString()
-  );
-
-  const mapRef = useRef<L.Map | null>(null);
-  const animationRef = useRef(null);
-
-  const {
-    selectedDivision,
-    selectedDistrict,
-    selectedUpazila,
-    divisions,
-    districts,
-    upazilas,
-    loading,
-    error,
-  } = useLocation();
-
-  const [divisionBoundary, setDivisionBoundary] = useState<
-    L.LatLngExpression[][]
-  >([]);
-  const [districtBoundary, setDistrictBoundary] = useState<
-    L.LatLngExpression[][]
-  >([]);
-  const [upazilaBoundary, setUpazilaBoundary] = useState<
-    L.LatLngExpression[][]
-  >([]);
-
-  const [mapCenter, setMapCenter] = useState<L.LatLngExpression>([
-    23.685, 90.3563,
-  ]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const fetchBoundary = useCallback(
-    async (osmId: number, type: "division" | "district" | "upazila") => {
-      setIsLoading(true);
-      try {
-        const apiUrl = `https://polygons.openstreetmap.fr/get_geojson.py?id=${osmId}&params=0`;
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-
-        let coordinates: L.LatLngExpression[][] = [];
-
-        if (data?.type === "MultiPolygon") {
-          coordinates = data.coordinates.map((polygon: number[][][]) =>
-            polygon[0].map((coord: number[]) => [coord[1], coord[0]])
-          );
-        } else if (data?.type === "Polygon") {
-          coordinates = [
-            data.coordinates[0].map((coord: number[]) => [coord[1], coord[0]]),
-          ];
-        } else {
-          console.error("Boundary data format not recognized:", data);
-          coordinates = [];
-        }
-
-        switch (type) {
-          case "division":
-            setDivisionBoundary(coordinates);
-            break;
-          case "district":
-            setDistrictBoundary(coordinates);
-            break;
-          case "upazila":
-            setUpazilaBoundary(coordinates);
-            break;
-        }
-      } catch (error) {
-        console.error(`Failed to fetch ${type} boundary:`, error);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
-
-  useEffect(() => {
-    if (selectedUpazila) {
-      setIsLoading(true);
-      setMapCenter(selectedUpazila.coordinates);
-      fetchBoundary(selectedUpazila.osmId, "upazila");
-      if (mapRef.current) {
-        mapRef.current.panTo(selectedUpazila.coordinates);
-      }
-    } else if (selectedDistrict) {
-      setIsLoading(true);
-      setMapCenter(selectedDistrict.coordinates);
-      fetchBoundary(selectedDistrict.osmId, "district");
-      if (mapRef.current) {
-        mapRef.current.panTo(selectedDistrict.coordinates);
-      }
-    } else if (selectedDivision) {
-      setIsLoading(true);
-      setMapCenter(selectedDivision.coordinates);
-      fetchBoundary(selectedDivision.osmId, "division");
-      if (mapRef.current) {
-        mapRef.current.panTo(selectedDivision.coordinates);
-      }
-    }
-  }, [selectedDivision, selectedDistrict, selectedUpazila, fetchBoundary]);
-
-  const dateIndex = dates.indexOf(currentDate);
-
-  const handleDateChange = (value) => {
-    setCurrentDate(dates[value[0]]);
-  };
-
-  // Toggle play/pause animation
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  // Animation effect
-  useEffect(() => {
-    if (isPlaying) {
-      let currentIndex = dateIndex;
-
-      animationRef.current = setInterval(() => {
-        currentIndex = (currentIndex + 1) % dates.length;
-        setCurrentDate(dates[currentIndex]);
-      }, 1500); // Change every 1.5 seconds
-    } else if (animationRef.current) {
-      clearInterval(animationRef.current);
-    }
-
-    return () => {
-      if (animationRef.current) {
-        clearInterval(animationRef.current);
-      }
-    };
-  }, [isPlaying, dateIndex, dates]);
-
-  // Update current time every minute
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date().toLocaleTimeString());
-    }, 60000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  // Get current weather summary for the selected date
-  const getWeatherSummary = (date) => {
-    const allDistricts = Object.values(weatherData[date]);
-    const avgTemp = Math.round(
-      allDistricts.reduce((sum, d) => sum + d.temp, 0) / allDistricts.length
-    );
-    const maxTemp = Math.max(...allDistricts.map((d) => d.temp));
-    const minTemp = Math.min(...allDistricts.map((d) => d.temp));
-    const totalRainfall = allDistricts.reduce((sum, d) => sum + d.rainfall, 0);
-    const avgRainfall = Math.round(totalRainfall / allDistricts.length);
-
-    // Count conditions to find most common
-    const conditionCounts = {};
-    allDistricts.forEach((d) => {
-      conditionCounts[d.condition] = (conditionCounts[d.condition] || 0) + 1;
-    });
-
-    const mostCommonCondition = Object.entries(conditionCounts).sort(
-      (a, b) => b[1] - a[1]
-    )[0][0];
-
-    return {
-      avgTemp,
-      maxTemp,
-      minTemp,
-      avgRainfall,
-      mostCommonCondition,
-      icon: weatherIcons[mostCommonCondition],
-    };
-  };
-
-  const weatherSummary = getWeatherSummary(currentDate);
-
-  return (
-    <div className="relative h-[600px] bg-gray-100 rounded-lg overflow-hidden">
-      {/* BBC-style header */}
-      <div className="absolute top-0 left-0 right-0 bg-[#0f0f0f] text-white z-[1001] flex items-center justify-between px-4 py-2">
-        <div className="flex items-center gap-2">
-          <div className="font-bold text-lg">Bangladesh Weather</div>
-          <div className="text-sm text-gray-300 flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            <span>Updated: {currentTime}</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1">
-            <Thermometer className="h-4 w-4 text-red-400" />
-            <span>{weatherSummary.avgTemp}°C</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Droplets className="h-4 w-4 text-blue-400" />
-            <span>{weatherSummary.avgRainfall} mm</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Wind className="h-4 w-4 text-gray-400" />
-            <span>12 km/h</span>
-          </div>
-        </div>
-      </div>
-
-      <div className={cn("relative")}>
-        <MapContainer
-          center={mapCenter}
-          zoom={8}
-          style={{ height: "600px", width: "100%" }}
-          ref={mapRef}
-        >
-          <FixLeafletIcons />
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-
-          {/* Render administrative boundaries based on selection */}
-          {selectedDivision && !selectedDistrict && !selectedUpazila && (
-            <>
-              <Marker position={selectedDivision.coordinates}>
-                <Popup>{selectedDivision.name} Division</Popup>
-              </Marker>
-              {divisionBoundary.length > 0 &&
-                divisionBoundary.map((polygon, index) => (
-                  <Polygon
-                    key={`div-${index}`}
-                    positions={polygon}
-                    color="blue"
-                    fillOpacity={0.1}
-                  />
-                ))}
-            </>
-          )}
-
-          {selectedDistrict && !selectedUpazila && (
-            <>
-              <Marker position={selectedDistrict.coordinates}>
-                <Popup>{selectedDistrict.name} District</Popup>
-              </Marker>
-              {districtBoundary.length > 0 &&
-                districtBoundary.map((polygon, index) => (
-                  <Polygon
-                    key={`dist-${index}`}
-                    positions={polygon}
-                    color="green"
-                    fillOpacity={0.1}
-                  />
-                ))}
-            </>
-          )}
-
-          {selectedUpazila && (
-            <>
-              <Marker position={selectedUpazila.coordinates}>
-                <Popup>{selectedUpazila.name} Upazila</Popup>
-              </Marker>
-              {upazilaBoundary.length > 0 &&
-                upazilaBoundary.map((polygon, index) => (
-                  <Polygon
-                    key={`upa-${index}`}
-                    positions={polygon}
-                    color="red"
-                    fillOpacity={0.1}
-                  />
-                ))}
-            </>
-          )}
-
-          {isLoading && (
-            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
-              <Loader2 className="animate-spin w-10 h-10 text-blue-500" />
-            </div>
-          )}
-
-          {/* Only show weather data when viewing Bangladesh or division level */}
-          {(!selectedDivision || !selectedDistrict) && (
-            <DynamicWeatherMap currentDate={currentDate} />
-          )}
-
-          <CustomZoomControl />
-          <ResetViewButton />
-        </MapContainer>
-      </div>
-
-      {/* Weather summary panel */}
-      <div className="absolute top-14 right-2 bg-white p-3 rounded shadow z-[1000] w-64">
-        <h3 className="font-bold text-lg mb-2">Weather Summary</h3>
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-4xl">{weatherSummary.icon}</div>
-          <div className="text-2xl font-bold">{weatherSummary.avgTemp}°C</div>
-        </div>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="flex items-center gap-1">
-            <Thermometer className="h-4 w-4 text-red-500" />
-            <span>High: {weatherSummary.maxTemp}°C</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Thermometer className="h-4 w-4 text-blue-500" />
-            <span>Low: {weatherSummary.minTemp}°C</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Droplets className="h-4 w-4 text-blue-500" />
-            <span>Rainfall: {weatherSummary.avgRainfall} mm</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Wind className="h-4 w-4 text-gray-500" />
-            <span>Wind: 12 km/h</span>
-          </div>
-        </div>
-        <div className="mt-3 text-sm text-gray-600 capitalize">
-          {weatherSummary.mostCommonCondition.replace("-", " ")} conditions
-          across most areas
-        </div>
-      </div>
-
-      <WeatherLegend />
-
-      {/* Timeline controls */}
-      <div className="absolute bottom-2 left-2 right-2 flex items-center gap-2 bg-white p-2 rounded shadow z-[1000]">
-        <div className="w-16">{dates[0]}</div>
-        <Button
-          size="icon"
-          variant="outline"
-          className="h-6 w-6"
-          onClick={togglePlay}
-        >
-          {isPlaying ? (
-            <Pause className="h-3 w-3" />
-          ) : (
-            <Play className="h-3 w-3" />
-          )}
-        </Button>
-        <div className="w-16">{dates[dates.length - 1]}</div>
-        <div className="flex-1 px-4">
-          <Slider
-            value={[dateIndex]}
-            max={dates.length - 1}
-            step={1}
-            onValueChange={handleDateChange}
-          />
-        </div>
-        <div className="w-16 text-center">{currentDate}</div>
-      </div>
-
-      {/* BBC-style footer */}
-      <div className="absolute bottom-14 left-2 right-2 max-w-sm mx-auto bg-amber-100/90 font-semibold p-2 rounded shadow z-[1000] text-xs text-center">
-        Weather data is simulated for demonstration purposes. Click on districts
-        to zoom in and see detailed weather information.
-      </div>
-    </div>
-  );
-}
