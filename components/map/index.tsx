@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import L from "leaflet";
 import { Loader2 } from "lucide-react";
-import { useDivision } from "@/contexts/divisionContext";
+import { useLocation } from "@/contexts/divisionContext";
 import { cn } from "@/lib/utils";
 
 // More detailed Bangladesh districts with proper boundaries
@@ -672,7 +672,6 @@ const weatherData = {
   },
 };
 
-// Weather condition icons mapping
 const weatherIcons = {
   sunny: "☀️",
   "partly-cloudy": "⛅",
@@ -971,59 +970,102 @@ export default function MapComponent() {
   const mapRef = useRef<L.Map | null>(null);
   const animationRef = useRef(null);
 
-  const { selectedDivision, divisions } = useDivision();
+  const {
+    selectedDivision,
+    selectedDistrict,
+    selectedUpazila,
+    divisions,
+    districts,
+    upazilas,
+    loading,
+    error,
+  } = useLocation();
+
   const [divisionBoundary, setDivisionBoundary] = useState<
     L.LatLngExpression[][]
   >([]);
-  const [mapCenter, setMapCenter] = useState<L.LatLngExpression>(
-    divisions[0].coordinates
-  );
+  const [districtBoundary, setDistrictBoundary] = useState<
+    L.LatLngExpression[][]
+  >([]);
+  const [upazilaBoundary, setUpazilaBoundary] = useState<
+    L.LatLngExpression[][]
+  >([]);
+
+  const [mapCenter, setMapCenter] = useState<L.LatLngExpression>([
+    23.685, 90.3563,
+  ]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchDivisionBoundary = useCallback(async (osmId: number) => {
-    setIsLoading(true);
-    try {
-      const apiUrl = `https://polygons.openstreetmap.fr/get_geojson.py?id=${osmId}&params=0`;
-      const response = await fetch(apiUrl);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
+  const fetchBoundary = useCallback(
+    async (osmId: number, type: "division" | "district" | "upazila") => {
+      setIsLoading(true);
+      try {
+        const apiUrl = `https://polygons.openstreetmap.fr/get_geojson.py?id=${osmId}&params=0`;
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
 
-      if (data?.type === "MultiPolygon") {
-        const coordinates = data.coordinates.map((polygon: number[][][]) =>
-          polygon[0].map((coord: number[]) => [coord[1], coord[0]])
-        );
-        setDivisionBoundary(coordinates);
-      } else if (data?.type === "Polygon") {
-        const coordinates = data.coordinates.map((coord: number[]) => [
-          coord[1],
-          coord[0],
-        ]);
-        setDivisionBoundary([coordinates]);
-      } else {
-        console.error("Boundary data format not recognized:", data);
-        setDivisionBoundary([]);
+        let coordinates: L.LatLngExpression[][] = [];
+
+        if (data?.type === "MultiPolygon") {
+          coordinates = data.coordinates.map((polygon: number[][][]) =>
+            polygon[0].map((coord: number[]) => [coord[1], coord[0]])
+          );
+        } else if (data?.type === "Polygon") {
+          coordinates = [
+            data.coordinates[0].map((coord: number[]) => [coord[1], coord[0]]),
+          ];
+        } else {
+          console.error("Boundary data format not recognized:", data);
+          coordinates = [];
+        }
+
+        switch (type) {
+          case "division":
+            setDivisionBoundary(coordinates);
+            break;
+          case "district":
+            setDistrictBoundary(coordinates);
+            break;
+          case "upazila":
+            setUpazilaBoundary(coordinates);
+            break;
+        }
+      } catch (error) {
+        console.error(`Failed to fetch ${type} boundary:`, error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to fetch division boundary:", error);
-      setDivisionBoundary([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   useEffect(() => {
-    if (selectedDivision) {
+    if (selectedUpazila) {
+      setIsLoading(true);
+      setMapCenter(selectedUpazila.coordinates);
+      fetchBoundary(selectedUpazila.osmId, "upazila");
+      if (mapRef.current) {
+        mapRef.current.panTo(selectedUpazila.coordinates);
+      }
+    } else if (selectedDistrict) {
+      setIsLoading(true);
+      setMapCenter(selectedDistrict.coordinates);
+      fetchBoundary(selectedDistrict.osmId, "district");
+      if (mapRef.current) {
+        mapRef.current.panTo(selectedDistrict.coordinates);
+      }
+    } else if (selectedDivision) {
       setIsLoading(true);
       setMapCenter(selectedDivision.coordinates);
-      fetchDivisionBoundary(selectedDivision.osmId);
-
+      fetchBoundary(selectedDivision.osmId, "division");
       if (mapRef.current) {
         mapRef.current.panTo(selectedDivision.coordinates);
       }
     }
-  }, [selectedDivision, fetchDivisionBoundary]);
+  }, [selectedDivision, selectedDistrict, selectedUpazila, fetchBoundary]);
 
   const dateIndex = dates.indexOf(currentDate);
 
@@ -1064,10 +1106,6 @@ export default function MapComponent() {
 
     return () => clearInterval(timer);
   }, []);
-
-  // Calculate the center of Bangladesh
-  const centerLat = (22.8456525 + 24.7886924) / 2;
-  const centerLng = (89.3012313 + 91.2487769) / 2;
 
   // Get current weather summary for the selected date
   const getWeatherSummary = (date) => {
@@ -1141,26 +1179,70 @@ export default function MapComponent() {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          {selectedDivision && (
-            <Marker position={selectedDivision.coordinates}>
-              <Popup>{selectedDivision.name}, Bangladesh</Popup>
-            </Marker>
+
+          {/* Render administrative boundaries based on selection */}
+          {selectedDivision && !selectedDistrict && !selectedUpazila && (
+            <>
+              <Marker position={selectedDivision.coordinates}>
+                <Popup>{selectedDivision.name} Division</Popup>
+              </Marker>
+              {divisionBoundary.length > 0 &&
+                divisionBoundary.map((polygon, index) => (
+                  <Polygon
+                    key={`div-${index}`}
+                    positions={polygon}
+                    color="blue"
+                    fillOpacity={0.1}
+                  />
+                ))}
+            </>
           )}
-          {divisionBoundary.length > 0 &&
-            divisionBoundary.map((polygon, index) => (
-              <Polygon
-                key={index}
-                positions={polygon}
-                color="blue"
-                fillOpacity={0.1}
-              />
-            ))}
+
+          {selectedDistrict && !selectedUpazila && (
+            <>
+              <Marker position={selectedDistrict.coordinates}>
+                <Popup>{selectedDistrict.name} District</Popup>
+              </Marker>
+              {districtBoundary.length > 0 &&
+                districtBoundary.map((polygon, index) => (
+                  <Polygon
+                    key={`dist-${index}`}
+                    positions={polygon}
+                    color="green"
+                    fillOpacity={0.1}
+                  />
+                ))}
+            </>
+          )}
+
+          {selectedUpazila && (
+            <>
+              <Marker position={selectedUpazila.coordinates}>
+                <Popup>{selectedUpazila.name} Upazila</Popup>
+              </Marker>
+              {upazilaBoundary.length > 0 &&
+                upazilaBoundary.map((polygon, index) => (
+                  <Polygon
+                    key={`upa-${index}`}
+                    positions={polygon}
+                    color="red"
+                    fillOpacity={0.1}
+                  />
+                ))}
+            </>
+          )}
+
           {isLoading && (
             <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
               <Loader2 className="animate-spin w-10 h-10 text-blue-500" />
             </div>
           )}
-          <DynamicWeatherMap currentDate={currentDate} />
+
+          {/* Only show weather data when viewing Bangladesh or division level */}
+          {(!selectedDivision || !selectedDistrict) && (
+            <DynamicWeatherMap currentDate={currentDate} />
+          )}
+
           <CustomZoomControl />
           <ResetViewButton />
         </MapContainer>

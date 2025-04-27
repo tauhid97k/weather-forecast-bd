@@ -1,7 +1,7 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Sidebar from "./../../components/sidebar";
-import { DivisionProvider } from "@/contexts/divisionContext";
+import { LocationProvider } from "@/contexts/divisionContext";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -37,7 +37,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             </div>
           </div>
           <div className="grow">
-            <DivisionProvider>{children}</DivisionProvider>
+            <LocationProvider>{children}</LocationProvider>
           </div>
         </div>
       </div>

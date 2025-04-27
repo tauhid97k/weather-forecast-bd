@@ -9,27 +9,57 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useDivision } from "@/contexts/divisionContext"; // Assuming your context is in this path
+import { useLocation } from "@/contexts/divisionContext";
 
 export default function MapControls({
   selectedRegion,
   setSelectedRegion,
-  selectedDistrict,
-  setSelectedDistrict,
   selectedPeriod,
   setSelectedPeriod,
   selectedIndex,
   setSelectedIndex,
 }) {
-  const { divisions, setSelectedDivision } = useDivision();
+  const {
+    selectedDivision,
+    setSelectedDivision,
+    selectedDistrict,
+    setSelectedDistrict,
+    selectedUpazila,
+    setSelectedUpazila,
+    divisions,
+    districts,
+    upazilas,
+    loading,
+    error,
+  } = useLocation();
 
   const handleDivisionChange = (value: string) => {
     const foundDivision = divisions.find((div) => div.name === value);
-    setSelectedDistrict(value); // Update local selectedDistrict state if needed
     if (foundDivision) {
-      setSelectedDivision(foundDivision); // Update the context
+      setSelectedDivision(foundDivision);
+      setSelectedDistrict(null); // Reset district when division changes
+      setSelectedUpazila(null); // Reset upazila when division changes
     } else {
-      setSelectedDivision(null); // Clear context if no match
+      setSelectedDivision(null);
+    }
+  };
+
+  const handleDistrictChange = (value: string) => {
+    const foundDistrict = districts.find((dist) => dist.name === value);
+    if (foundDistrict) {
+      setSelectedDistrict(foundDistrict);
+      setSelectedUpazila(null); // Reset upazila when district changes
+    } else {
+      setSelectedDistrict(null);
+    }
+  };
+
+  const handleUpazilaChange = (value: string) => {
+    const foundUpazila = upazilas.find((upa) => upa.name === value);
+    if (foundUpazila) {
+      setSelectedUpazila(foundUpazila);
+    } else {
+      setSelectedUpazila(null);
     }
   };
 
@@ -49,18 +79,17 @@ export default function MapControls({
           <Label htmlFor="bangladesh">Bangladesh</Label>
         </div>
         <div className="flex items-center space-x-2">
-          <RadioGroupItem
-            checked={selectedDistrict}
-            value="district"
-            id="district"
-          />
-          <Label htmlFor="district">
+          <RadioGroupItem value="division" id="division" />
+          <Label htmlFor="division">
             <Select
-              value={selectedDistrict}
+              value={selectedDivision?.name || ""}
               onValueChange={handleDivisionChange}
+              disabled={loading}
             >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Division" />
+                <SelectValue
+                  placeholder={loading ? "Loading..." : "Division"}
+                />
               </SelectTrigger>
               <SelectContent>
                 {divisions.map((division) => (
@@ -72,6 +101,64 @@ export default function MapControls({
             </Select>
           </Label>
         </div>
+        {selectedDivision && (
+          <div className="flex items-center space-x-2 ml-6">
+            <RadioGroupItem value="district" id="district" />
+            <Label htmlFor="district">
+              <Select
+                value={selectedDistrict?.name || ""}
+                onValueChange={handleDistrictChange}
+                disabled={loading || !selectedDivision}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue
+                    placeholder={
+                      loading && selectedDivision
+                        ? "Loading..."
+                        : "Select District"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {districts.map((district) => (
+                    <SelectItem key={district.osmId} value={district.name}>
+                      {district.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Label>
+          </div>
+        )}
+        {selectedDistrict && (
+          <div className="flex items-center space-x-2 ml-6">
+            <RadioGroupItem value="upazila" id="upazila" />
+            <Label htmlFor="upazila">
+              <Select
+                value={selectedUpazila?.name || ""}
+                onValueChange={handleUpazilaChange}
+                disabled={loading || !selectedDistrict}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue
+                    placeholder={
+                      loading && selectedDistrict
+                        ? "Loading..."
+                        : "Select Upazila"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {upazilas.map((upazila) => (
+                    <SelectItem key={upazila.osmId} value={upazila.name}>
+                      {upazila.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Label>
+          </div>
+        )}
       </RadioGroup>
 
       <h4 className="font-medium mb-2">Select Periodicity</h4>
@@ -108,6 +195,8 @@ export default function MapControls({
           <SelectItem value="Temperature">Temperature</SelectItem>
         </SelectContent>
       </Select>
+
+      {error && <div className="mt-4 text-red-600 text-sm">Error: {error}</div>}
     </div>
   );
 }
