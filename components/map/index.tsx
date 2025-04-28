@@ -242,7 +242,7 @@ function DynamicWeatherMap({ currentDate }: { currentDate: string }) {
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
 
   // Style function for GeoJSON features
-  const style = (feature: DistrictFeature) => {
+  const style = (feature: any) => {
     const id = feature.properties.id;
     const isSelected = selectedDistrict === id;
     const data = weatherData[currentDate][id];
@@ -275,20 +275,21 @@ function DynamicWeatherMap({ currentDate }: { currentDate: string }) {
 
     if (selectedDistrict === id) {
       setSelectedDistrict(null);
-      map.fitBounds(geoJsonLayerRef.current?.getBounds() as L.LatLngBounds);
+      map.flyToBounds(geoJsonLayerRef.current?.getBounds() as L.LatLngBounds, {
+        duration: 0.8
+      });
     } else {
       setSelectedDistrict(id);
-      map.fitBounds(layer.getBounds(), {
+      map.flyToBounds(layer.getBounds(), {
         padding: [50, 50],
         maxZoom: 10,
-        animate: true,
-        duration: 1,
+        duration: 0.8,
       });
     }
   };
 
   // Add click handler
-  const onEachFeature = (feature: DistrictFeature, layer: L.Layer) => {
+  const onEachFeature = (feature: any, layer: L.Layer) => {
     layer.on({
       click: zoomToFeature,
     });
@@ -362,30 +363,93 @@ function ResetViewButton() {
   const map = useMap();
   const { selectedDivision, selectedDistrict, selectedUpazila } = useLocation();
 
+  // Helper function to find polygons in the map by color
+  const findPolygonsInMap = (color: string): L.Polygon[] => {
+    const polygons: L.Polygon[] = [];
+    
+    // Safely iterate through all layers
+    map.eachLayer((layer) => {
+      // Check if it's a polygon with the specified color
+      if (
+        layer instanceof L.Polygon && 
+        layer.options && 
+        layer.options.color === color
+      ) {
+        polygons.push(layer);
+      }
+    });
+    
+    return polygons;
+  };
+
   const handleResetView = () => {
     if (selectedUpazila) {
-      // Zoom to upazila
-      map.setView(selectedUpazila.coordinates, ZOOM_LEVELS.upazila, {
-        animate: true,
-        duration: 1,
+      // Zoom to upazila with appropriate bounds if available
+      try {
+        // Find all polygons in the map
+        const polygons = findPolygonsInMap("red");
+        if (polygons.length > 0) {
+          // Use the first found polygon
+          map.flyToBounds(polygons[0].getBounds(), {
+            padding: [50, 50],
+            maxZoom: ZOOM_LEVELS.upazila,
+            duration: 0.8,
+          });
+          return;
+        }
+      } catch (error) {
+        console.error("Error finding upazila polygon:", error);
+      }
+      // Fallback to coordinates if polygon not found
+      map.flyTo(selectedUpazila.coordinates, ZOOM_LEVELS.upazila, {
+        duration: 0.8,
       });
     } else if (selectedDistrict) {
-      // Zoom to district
-      map.setView(selectedDistrict.coordinates, ZOOM_LEVELS.district, {
-        animate: true,
-        duration: 1,
+      // Zoom to district with appropriate bounds if available
+      try {
+        // Find all polygons in the map
+        const polygons = findPolygonsInMap("green");
+        if (polygons.length > 0) {
+          // Use the first found polygon
+          map.flyToBounds(polygons[0].getBounds(), {
+            padding: [50, 50],
+            maxZoom: ZOOM_LEVELS.district,
+            duration: 0.8,
+          });
+          return;
+        }
+      } catch (error) {
+        console.error("Error finding district polygon:", error);
+      }
+      // Fallback to coordinates if polygon not found
+      map.flyTo(selectedDistrict.coordinates, ZOOM_LEVELS.district, {
+        duration: 0.8,
       });
     } else if (selectedDivision) {
-      // Zoom to division
-      map.setView(selectedDivision.coordinates, ZOOM_LEVELS.division, {
-        animate: true,
-        duration: 1,
+      // Zoom to division with appropriate bounds if available
+      try {
+        // Find all polygons in the map
+        const polygons = findPolygonsInMap("blue");
+        if (polygons.length > 0) {
+          // Use the first found polygon
+          map.flyToBounds(polygons[0].getBounds(), {
+            padding: [50, 50],
+            maxZoom: ZOOM_LEVELS.division,
+            duration: 0.8,
+          });
+          return;
+        }
+      } catch (error) {
+        console.error("Error finding division polygon:", error);
+      }
+      // Fallback to coordinates if polygon not found
+      map.flyTo(selectedDivision.coordinates, ZOOM_LEVELS.division, {
+        duration: 0.8,
       });
     } else {
       // Zoom to country
-      map.fitBounds(BANGLADESH_BOUNDS, {
-        animate: true,
-        duration: 1,
+      map.flyToBounds(BANGLADESH_BOUNDS, {
+        duration: 0.8,
       });
     }
   };
@@ -415,7 +479,7 @@ export default function MapComponent() {
   const mapRef = useRef<L.Map | null>(null);
   const animationRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { selectedDivision, selectedDistrict, selectedUpazila, loading } =
+  const { selectedDivision, selectedDistrict, selectedUpazila } =
     useLocation();
 
   const [divisionBoundary, setDivisionBoundary] = useState<
@@ -433,32 +497,21 @@ export default function MapComponent() {
   ]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Define zoomToLocation function
-  const zoomToLocation = useCallback(
-    (
-      coordinates: L.LatLngExpression,
-      boundary: L.LatLngExpression[][],
-      level: keyof typeof ZOOM_LEVELS
-    ) => {
-      if (mapRef.current) {
-        if (boundary.length > 0) {
-          const polygon = L.polygon(boundary);
-          mapRef.current.fitBounds(polygon.getBounds(), {
-            padding: [50, 50],
-            maxZoom: ZOOM_LEVELS[level],
-            animate: true,
-            duration: 1,
-          });
-        } else {
-          mapRef.current.setView(coordinates, ZOOM_LEVELS[level], {
-            animate: true,
-            duration: 1,
-          });
-        }
-      }
-    },
-    []
-  );
+
+
+  // Helper function to zoom to a location with boundary - kept for reference
+  // const zoomToBoundary = (boundary: L.LatLngExpression[][], level: keyof typeof ZOOM_LEVELS) => {
+  //   if (mapRef.current && boundary.length > 0) {
+  //     const polygon = L.polygon(boundary);
+  //     mapRef.current.flyToBounds(polygon.getBounds(), {
+  //       padding: [50, 50],
+  //       maxZoom: ZOOM_LEVELS[level],
+  //       duration: 0.8, // Faster animation
+  //     });
+  //     return true;
+  //   }
+  //   return false;
+  // };
 
   const fetchBoundary = useCallback(
     async (osmId: number, type: "division" | "district" | "upazila") => {
@@ -489,12 +542,39 @@ export default function MapComponent() {
         switch (type) {
           case "division":
             setDivisionBoundary(coordinates);
+            // Apply zoom directly here after boundary is loaded
+            if (mapRef.current && coordinates.length > 0) {
+              const polygon = L.polygon(coordinates);
+              mapRef.current.flyToBounds(polygon.getBounds(), {
+                padding: [50, 50],
+                maxZoom: ZOOM_LEVELS.division,
+                duration: 0.8,
+              });
+            }
             break;
           case "district":
             setDistrictBoundary(coordinates);
+            // Apply zoom directly here after boundary is loaded
+            if (mapRef.current && coordinates.length > 0) {
+              const polygon = L.polygon(coordinates);
+              mapRef.current.flyToBounds(polygon.getBounds(), {
+                padding: [50, 50],
+                maxZoom: ZOOM_LEVELS.district,
+                duration: 0.8,
+              });
+            }
             break;
           case "upazila":
             setUpazilaBoundary(coordinates);
+            // Apply zoom directly here after boundary is loaded
+            if (mapRef.current && coordinates.length > 0) {
+              const polygon = L.polygon(coordinates);
+              mapRef.current.flyToBounds(polygon.getBounds(), {
+                padding: [50, 50],
+                maxZoom: ZOOM_LEVELS.upazila,
+                duration: 0.8,
+              });
+            }
             break;
         }
       } catch (error) {
@@ -503,50 +583,59 @@ export default function MapComponent() {
         setIsLoading(false);
       }
     },
-    []
+    [mapRef]
   );
 
+  // No longer needed since we always fetch boundaries
+  // const initialSelectionRef = useRef(true);
+
+  // Effect to clear boundaries when selection changes
+  useEffect(() => {
+    // When selection changes, clear the boundaries that are no longer relevant
+    if (!selectedDivision) {
+      setDivisionBoundary([]);
+      setDistrictBoundary([]);
+      setUpazilaBoundary([]);
+    } else if (!selectedDistrict) {
+      setDistrictBoundary([]);
+      setUpazilaBoundary([]);
+    } else if (!selectedUpazila) {
+      setUpazilaBoundary([]);
+    }
+  }, [selectedDivision, selectedDistrict, selectedUpazila]);
+
+  // Effect to handle zooming and boundary fetching
   useEffect(() => {
     if (selectedUpazila) {
       setIsLoading(true);
       setMapCenter(selectedUpazila.coordinates);
-      fetchBoundary(selectedUpazila.osmId, "upazila").then(() => {
-        zoomToLocation(selectedUpazila.coordinates, upazilaBoundary, "upazila");
-      });
+      
+      // Always fetch boundary for upazila to ensure we have the latest
+      fetchBoundary(selectedUpazila.osmId, "upazila");
     } else if (selectedDistrict) {
       setIsLoading(true);
       setMapCenter(selectedDistrict.coordinates);
-      fetchBoundary(selectedDistrict.osmId, "district").then(() => {
-        zoomToLocation(
-          selectedDistrict.coordinates,
-          districtBoundary,
-          "district"
-        );
-      });
+      
+      // Always fetch boundary for district to ensure we have the latest
+      fetchBoundary(selectedDistrict.osmId, "district");
     } else if (selectedDivision) {
       setIsLoading(true);
       setMapCenter(selectedDivision.coordinates);
-      fetchBoundary(selectedDivision.osmId, "division").then(() => {
-        zoomToLocation(
-          selectedDivision.coordinates,
-          divisionBoundary,
-          "division"
-        );
-      });
+      
+      // Always fetch boundary for division to ensure we have the latest
+      fetchBoundary(selectedDivision.osmId, "division");
     } else {
       if (mapRef.current) {
-        mapRef.current.fitBounds(BANGLADESH_BOUNDS);
+        mapRef.current.flyToBounds(BANGLADESH_BOUNDS, {
+          duration: 0.8
+        });
       }
     }
   }, [
     selectedDivision,
     selectedDistrict,
     selectedUpazila,
-    divisionBoundary,
-    districtBoundary,
-    upazilaBoundary,
     fetchBoundary,
-    zoomToLocation,
   ]);
 
   const dateIndex = dates.indexOf(currentDate);
@@ -655,6 +744,10 @@ export default function MapComponent() {
           zoom={8}
           style={{ height: "600px", width: "100%" }}
           ref={mapRef}
+          zoomControl={false}
+          dragging={true}
+          doubleClickZoom={true}
+          scrollWheelZoom={true}
         >
           <FixLeafletIcons />
           <TileLayer
