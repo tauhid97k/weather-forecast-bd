@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import MapComponent from "@/components/map";
+import dynamic from 'next/dynamic';
 import MapControls from "@/components/map/map-controls";
 import RainfallChart from "@/components/charts/rainfall-chart";
 import EvapotranspirationChart from "@/components/charts/evapotranspiration-chart";
 import SoilMoistureChart from "@/components/charts/soil-moisture-chart";
 import TemperatureChart from "@/components/charts/temperature-chart";
+
+const MapComponent = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function DroughtDashboard() {
   const [selectedRegion, setSelectedRegion] = useState("Bangladesh");
