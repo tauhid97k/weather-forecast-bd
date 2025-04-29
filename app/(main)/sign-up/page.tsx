@@ -20,14 +20,43 @@ import { motion } from "framer-motion";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Add sign-up logic here
+    setLoading(true); // Start loading
+
+    const formData = new FormData(e.currentTarget);
+    const username = formData.get("username") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Something went wrong.");
+      } else {
+        alert("Account created successfully!");
+        // Optional: redirect to login page
+        window.location.href = "/sign-in";
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false); // Stop loading
+    }
   };
 
   const fadeIn = {
@@ -117,6 +146,7 @@ export default function SignUpForm() {
             <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               id="username"
+              name="username"
               type="text"
               placeholder="Enter your username"
               className="pl-10"
@@ -131,6 +161,7 @@ export default function SignUpForm() {
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               id="email"
+              name="email"
               type="email"
               placeholder="Enter your email address"
               className="pl-10"
@@ -145,6 +176,7 @@ export default function SignUpForm() {
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               id="password"
+              name="password"
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               className="pl-10 pr-10"
@@ -155,7 +187,11 @@ export default function SignUpForm() {
               onClick={togglePasswordVisibility}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
             >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </button>
           </div>
         </div>
@@ -172,14 +208,40 @@ export default function SignUpForm() {
 
         <Button
           type="submit"
-          className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md"
+          className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md flex items-center justify-center gap-2"
+          disabled={loading}
         >
-          Sign Up
+          {loading && (
+            <svg
+              className="animate-spin h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              ></path>
+            </svg>
+          )}
+          {loading ? "Creating..." : "Sign Up"}
         </Button>
 
         <p className="text-center text-sm text-gray-600">
           Already have an account?{" "}
-          <a href="/sign-in" className="font-medium text-blue-700 hover:underline">
+          <a
+            href="/sign-in"
+            className="font-medium text-blue-700 hover:underline"
+          >
             Sign In
           </a>
         </p>
