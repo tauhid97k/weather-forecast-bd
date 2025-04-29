@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@heroui/react": "^2.8.0-beta.1",
     "@hookform/resolvers": "^5.0.1",
     "@prisma/client": "^6.6.0",
     "@radix-ui/react-avatar": "^1.1.4",
@@ -30,6 +29,7 @@
     "@radix-ui/react-tooltip": "^1.2.0",
     "axios": "^1.9.0",
     "bcryptjs": "^3.0.2",
+    "better-auth": "^1.2.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

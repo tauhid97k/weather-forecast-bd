@@ -16,10 +16,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
+import { signIn } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "sonner";
+import { FormError } from "@/components/ui/form-error";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState<string>("");
+  const router = useRouter();
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
@@ -27,33 +34,33 @@ export default function SignInForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
-  
+
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-  
-    try {
-      const res = await fetch("/api/signin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-  
-      const data = await res.json();
-  
-      if (!res.ok) {
-        alert(data.message || "Something went wrong.");
-      } else {
-        alert("Signed in successfully!");
-        window.location.href = "/dashboard"; // Redirect to homepage/dashboard
+
+    await signIn.email(
+      {
+        email,
+        password,
+      },
+      {
+        onRequest: () => {
+          setLoading(true);
+          setFormError("");
+        },
+        onSuccess: () => {
+          toast.success("Login successful");
+          router.push("/dashboard");
+          router.refresh();
+        },
+        onError: (ctx) => {
+          setFormError(ctx.error.message);
+        },
       }
-    } catch (error) {
-      console.error(error);
-      alert("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    );
+
+    setLoading(false);
   };
 
   // Animation variants
@@ -242,6 +249,8 @@ export default function SignInForm() {
           </a>
         </div>
 
+        <FormError message={formError} />
+
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md flex items-center justify-center gap-2"
@@ -274,9 +283,12 @@ export default function SignInForm() {
 
         <p className="text-center text-sm text-gray-600">
           Don’t have an account?{" "}
-          <a href="/sign-up" className="font-medium text-blue-700 hover:underline">
+          <Link
+            href="/sign-up"
+            className="font-medium text-blue-700 hover:underline"
+          >
             Create an account
-          </a>
+          </Link>
         </p>
       </form>
     </div>
