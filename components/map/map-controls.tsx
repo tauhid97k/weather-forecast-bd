@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useLocation } from "@/contexts/divisionContext";
+import { useSession } from "@/lib/auth-client";
 
 export default function MapControls({
   selectedRegion,
@@ -19,6 +20,8 @@ export default function MapControls({
   selectedIndex,
   setSelectedIndex,
 }) {
+  const { data: session } = useSession();
+
   const {
     selectedDivision,
     setSelectedDivision,
@@ -33,8 +36,17 @@ export default function MapControls({
     error,
   } = useLocation();
 
+  const permittedDivisions = divisions.filter(
+    (division) => division.name === session?.user.division
+  );
+
+  const permittedDistricts = districts.filter(
+    (district) => district.name === session?.user.district
+  );
+
   const handleDivisionChange = (value: string) => {
     const foundDivision = divisions.find((div) => div.name === value);
+
     if (foundDivision) {
       setSelectedDivision(foundDivision);
       setSelectedDistrict(null); // Reset district when division changes
@@ -92,7 +104,7 @@ export default function MapControls({
                 />
               </SelectTrigger>
               <SelectContent>
-                {divisions.map((division) => (
+                {permittedDivisions.map((division) => (
                   <SelectItem key={division.osmId} value={division.name}>
                     {division.name}
                   </SelectItem>
@@ -120,7 +132,7 @@ export default function MapControls({
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {districts.map((district) => (
+                  {permittedDistricts.map((district) => (
                     <SelectItem key={district.osmId} value={district.name}>
                       {district.name}
                     </SelectItem>

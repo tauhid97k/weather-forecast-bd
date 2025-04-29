@@ -276,7 +276,7 @@ function DynamicWeatherMap({ currentDate }: { currentDate: string }) {
     if (selectedDistrict === id) {
       setSelectedDistrict(null);
       map.flyToBounds(geoJsonLayerRef.current?.getBounds() as L.LatLngBounds, {
-        duration: 0.8
+        duration: 0.8,
       });
     } else {
       setSelectedDistrict(id);
@@ -366,19 +366,19 @@ function ResetViewButton() {
   // Helper function to find polygons in the map by color
   const findPolygonsInMap = (color: string): L.Polygon[] => {
     const polygons: L.Polygon[] = [];
-    
+
     // Safely iterate through all layers
     map.eachLayer((layer) => {
       // Check if it's a polygon with the specified color
       if (
-        layer instanceof L.Polygon && 
-        layer.options && 
+        layer instanceof L.Polygon &&
+        layer.options &&
         layer.options.color === color
       ) {
         polygons.push(layer);
       }
     });
-    
+
     return polygons;
   };
 
@@ -479,8 +479,7 @@ export default function MapComponent() {
   const mapRef = useRef<L.Map | null>(null);
   const animationRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { selectedDivision, selectedDistrict, selectedUpazila } =
-    useLocation();
+  const { selectedDivision, selectedDistrict, selectedUpazila } = useLocation();
 
   const [divisionBoundary, setDivisionBoundary] = useState<
     L.LatLngExpression[][]
@@ -496,8 +495,6 @@ export default function MapComponent() {
     23.685, 90.3563,
   ]);
   const [isLoading, setIsLoading] = useState(false);
-
-
 
   // Helper function to zoom to a location with boundary - kept for reference
   // const zoomToBoundary = (boundary: L.LatLngExpression[][], level: keyof typeof ZOOM_LEVELS) => {
@@ -609,34 +606,29 @@ export default function MapComponent() {
     if (selectedUpazila) {
       setIsLoading(true);
       setMapCenter(selectedUpazila.coordinates);
-      
+
       // Always fetch boundary for upazila to ensure we have the latest
       fetchBoundary(selectedUpazila.osmId, "upazila");
     } else if (selectedDistrict) {
       setIsLoading(true);
       setMapCenter(selectedDistrict.coordinates);
-      
+
       // Always fetch boundary for district to ensure we have the latest
       fetchBoundary(selectedDistrict.osmId, "district");
     } else if (selectedDivision) {
       setIsLoading(true);
       setMapCenter(selectedDivision.coordinates);
-      
+
       // Always fetch boundary for division to ensure we have the latest
       fetchBoundary(selectedDivision.osmId, "division");
     } else {
       if (mapRef.current) {
         mapRef.current.flyToBounds(BANGLADESH_BOUNDS, {
-          duration: 0.8
+          duration: 0.8,
         });
       }
     }
-  }, [
-    selectedDivision,
-    selectedDistrict,
-    selectedUpazila,
-    fetchBoundary,
-  ]);
+  }, [selectedDivision, selectedDistrict, selectedUpazila, fetchBoundary]);
 
   const dateIndex = dates.indexOf(currentDate);
 
