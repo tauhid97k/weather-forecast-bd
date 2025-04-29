@@ -46,7 +46,7 @@ export default function SignInForm() {
         alert(data.message || "Something went wrong.");
       } else {
         alert("Signed in successfully!");
-        window.location.href = "/"; // Redirect to homepage/dashboard
+        window.location.href = "/dashboard"; // Redirect to homepage/dashboard
       }
     } catch (error) {
       console.error(error);

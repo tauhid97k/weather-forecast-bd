@@ -113,9 +113,9 @@ export default function LandingPage() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="hidden md:block">
+            <Link href="/sign-in" className="hidden md:block">
               <Button className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center gap-2">
-                Access Dashboard
+                Sign In
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
