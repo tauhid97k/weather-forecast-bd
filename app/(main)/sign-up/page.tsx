@@ -6,6 +6,7 @@ import {
   Lock,
   Eye,
   EyeOff,
+  User,
   Cloud,
   CloudRain,
   Sun,
@@ -17,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 
-export default function SignInForm() {
+export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
@@ -26,10 +27,9 @@ export default function SignInForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Add sign-in logic here
+    // Add sign-up logic here
   };
 
-  // Animation variants
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
@@ -37,109 +37,57 @@ export default function SignInForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      {/* Animated background elements with deeper colors */}
+      {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden -z-10">
         <motion.div
           className="absolute top-20 left-10 w-64 h-64 rounded-full bg-cyan-300/30 dark:bg-cyan-700/20 blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-          }}
+          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 8, repeat: Infinity, repeatType: "reverse" }}
         />
         <motion.div
           className="absolute bottom-20 right-10 w-80 h-80 rounded-full bg-blue-400/30 dark:bg-blue-600/20 blur-3xl"
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-          }}
+          animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
+          transition={{ duration: 10, repeat: Infinity, repeatType: "reverse" }}
         />
         <motion.div
           className="absolute top-40 right-20 w-72 h-72 rounded-full bg-purple-300/20 dark:bg-purple-700/10 blur-3xl"
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.1, 0.3, 0.1],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-          }}
+          animate={{ scale: [1, 1.3, 1], opacity: [0.1, 0.3, 0.1] }}
+          transition={{ duration: 12, repeat: Infinity, repeatType: "reverse" }}
         />
       </div>
 
-      {/* Floating weather icons with enhanced animations */}
+      {/* Floating weather icons */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-5">
         <motion.div
           className="absolute top-[15%] left-[10%]"
-          animate={{
-            y: [0, -15, 0],
-            rotate: [0, 5, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 6,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-          }}
+          animate={{ y: [0, -15, 0], rotate: [0, 5, 0], scale: [1, 1.1, 1] }}
+          transition={{ duration: 6, repeat: Infinity, repeatType: "reverse" }}
         >
           <Cloud className="h-10 w-10 text-cyan-500/40 dark:text-cyan-400/30" />
         </motion.div>
         <motion.div
           className="absolute top-[25%] right-[15%]"
-          animate={{
-            y: [0, -20, 0],
-            rotate: [0, -5, 0],
-            scale: [1, 1.15, 1],
-          }}
-          transition={{
-            duration: 7,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-          }}
+          animate={{ y: [0, -20, 0], rotate: [0, -5, 0], scale: [1, 1.15, 1] }}
+          transition={{ duration: 7, repeat: Infinity, repeatType: "reverse" }}
         >
           <CloudRain className="h-12 w-12 text-blue-500/40 dark:text-blue-400/30" />
         </motion.div>
         <motion.div
           className="absolute bottom-[30%] left-[20%]"
-          animate={{
-            y: [0, -10, 0],
-            rotate: [0, 10, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 5,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-          }}
+          animate={{ y: [0, -10, 0], rotate: [0, 10, 0], scale: [1, 1.1, 1] }}
+          transition={{ duration: 5, repeat: Infinity, repeatType: "reverse" }}
         >
           <Sun className="h-14 w-14 text-amber-500/40 dark:text-amber-400/30" />
         </motion.div>
         <motion.div
           className="absolute bottom-[20%] right-[25%]"
-          animate={{
-            y: [0, -15, 0],
-            rotate: [0, -8, 0],
-            scale: [1, 1.12, 1],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-          }}
+          animate={{ y: [0, -15, 0], rotate: [0, -8, 0], scale: [1, 1.12, 1] }}
+          transition={{ duration: 8, repeat: Infinity, repeatType: "reverse" }}
         >
           <Droplets className="h-10 w-10 text-cyan-500/40 dark:text-cyan-400/30" />
         </motion.div>
       </div>
+
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-sm space-y-6 rounded-lg bg-white p-8 shadow-lg"
@@ -151,18 +99,31 @@ export default function SignInForm() {
           </div>
         </div>
 
-        {/* <h2 className="text-center text-2xl font-semibold text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">Weather Forecast BD!</h2> */}
         <motion.h1
           className="text-4xl text-center font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400"
           variants={fadeIn}
         >
-          BD Weather
+          Create Account
         </motion.h1>
         <p className="text-center text-sm text-gray-500">
-          Enter email & password to continue.
+          Join us today! It’s quick and easy.
         </p>
 
         <div className="space-y-4">
+          <div className="relative">
+            <Label htmlFor="username" className="sr-only">
+              Username
+            </Label>
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              id="username"
+              type="text"
+              placeholder="Enter your username"
+              className="pl-10"
+              required
+            />
+          </div>
+
           <div className="relative">
             <Label htmlFor="email" className="sr-only">
               Email
@@ -194,36 +155,32 @@ export default function SignInForm() {
               onClick={togglePasswordVisibility}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
             >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-2">
-            <Checkbox id="remember" />
-            <Label htmlFor="remember">Remember me</Label>
-          </div>
-          <a href="#" className="text-sm text-black hover:underline">
-            Forgot password
-          </a>
+        <div className="flex items-center gap-2 text-sm">
+          <Checkbox id="terms" />
+          <Label htmlFor="terms">
+            I agree to the{" "}
+            <a href="#" className="text-black underline">
+              terms and conditions
+            </a>
+          </Label>
         </div>
 
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md"
         >
-          Sign In
+          Sign Up
         </Button>
 
         <p className="text-center text-sm text-gray-600">
-          Don’t have an account?{" "}
-          <a href="/sign-up" className="font-medium text-blue-700 hover:underline">
-            Create an account
+          Already have an account?{" "}
+          <a href="/sign-in" className="font-medium text-blue-700 hover:underline">
+            Sign In
           </a>
         </p>
       </form>
