@@ -2,6 +2,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Sidebar from "./../../components/sidebar";
 import { LocationProvider } from "@/contexts/divisionContext";
+import Profile from "@/components/profile";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -11,7 +12,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
         <div className="grow overflow-y-auto">
           <div className="flex flex-col">
-            <div className="bg-blue-400 px-6 py-2">
+            <div className="bg-blue-400 px-6 py-2 flex items-center justify-between">
               <Tabs defaultValue="current" className="w-full">
                 <TabsList className="bg-transparent h-12">
                   <TabsTrigger
@@ -34,6 +35,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
+              <Profile />
             </div>
           </div>
           <div className="grow">

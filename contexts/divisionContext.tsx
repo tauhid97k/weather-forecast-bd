@@ -3,6 +3,7 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { LatLngExpression } from "leaflet";
 import axios from "axios";
+import { useSession } from "@/lib/auth-client";
 
 // Overpass API endpoint
 const OVERPASS_API = "https://overpass-api.de/api/interpreter";
@@ -151,6 +152,7 @@ export const LocationProvider = ({
   const [divisions, setDivisions] = useState<AdministrativeArea[]>([]);
   const [districts, setDistricts] = useState<AdministrativeArea[]>([]);
   const [upazilas, setUpazilas] = useState<AdministrativeArea[]>([]);
+  const { data: session } = useSession();
 
   const [selectedDivision, setSelectedDivision] =
     useState<AdministrativeArea | null>(null);
@@ -246,7 +248,14 @@ export const LocationProvider = ({
           };
         });
 
-        setDivisions(processedDivisions);
+        const permittedDivision = processedDivisions.filter(
+          (division) => division.name === session?.user.division
+        );
+
+        console.log("Original", processedDivisions);
+        console.log("Permitted", permittedDivision);
+
+        setDivisions(permittedDivision);
       } catch (err) {
         console.error("Error loading divisions:", err);
         setError("Failed to load divisions. Please try again later.");
@@ -298,7 +307,11 @@ export const LocationProvider = ({
           };
         });
 
-        setDistricts(processedDistricts);
+        const permittedDistricts = processedDistricts.filter(
+          (district) => district.name === session?.user.district
+        );
+
+        setDistricts(permittedDistricts);
       } catch (err) {
         console.error("Error loading districts:", err);
         setError("Failed to load districts. Please try again later.");
