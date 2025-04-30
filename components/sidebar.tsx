@@ -12,6 +12,7 @@ import {
   Codesandbox,
   Binoculars,
   CloudHail,
+  Users,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 
@@ -84,6 +85,13 @@ const Sidebar = () => {
             label="Synoptic Code"
             isCollapsed={isCollapsed}
             roles={["super_admin", "data_admin", "station_admin"]}
+          />
+          <SidebarLink
+            href="/dashboard/user"
+            icon={<Users className="w-5 h-5" />}
+            label="User Management"
+            isCollapsed={isCollapsed}
+            roles={["supperadmin"]}
           />
         </nav>
       </div>
