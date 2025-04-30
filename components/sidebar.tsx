@@ -19,8 +19,6 @@ const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   // Fetch user role from session
   const { data: session } = useSession();
-  const userRole = session?.user?.role || "user";
-
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
   };
@@ -52,7 +50,7 @@ const Sidebar = () => {
             icon={<LayoutDashboard className="w-5 h-5" />}
             label={`Dashboard (${session?.user?.role || "No Role"})`}
             isCollapsed={isCollapsed}
-            roles={["supperadmin", "stationadmin"]}
+            roles={["super_admin"]}
           />
 
           {/* Visible to dataentry */}
@@ -61,7 +59,7 @@ const Sidebar = () => {
             icon={<CloudHail className="w-5 h-5" />}
             label="First Card"
             isCollapsed={isCollapsed}
-            roles={["dataentry"]}
+            roles={["super_admin", "data_admin", "station_admin"]}
           />
 
           <SidebarLink
@@ -69,7 +67,7 @@ const Sidebar = () => {
             icon={<Binoculars className="w-5 h-5" />}
             label="Second Card"
             isCollapsed={isCollapsed}
-            roles={["dataentry"]}
+            roles={["super_admin", "data_admin", "station_admin"]}
           />
 
           <SidebarLink
@@ -77,7 +75,7 @@ const Sidebar = () => {
             icon={<BarChart className="w-5 h-5" />}
             label="Daily Summary"
             isCollapsed={isCollapsed}
-            roles={["dataentry"]}
+            roles={["super_admin", "data_admin", "station_admin"]}
           />
 
           <SidebarLink
@@ -85,7 +83,7 @@ const Sidebar = () => {
             icon={<Codesandbox className="w-5 h-5" />}
             label="Synoptic Code"
             isCollapsed={isCollapsed}
-            roles={["dataentry"]}
+            roles={["super_admin", "data_admin", "station_admin"]}
           />
         </nav>
       </div>

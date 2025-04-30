@@ -19,6 +19,13 @@ export default function MapControls({
   setSelectedPeriod,
   selectedIndex,
   setSelectedIndex,
+}: {
+  selectedRegion: string;
+  setSelectedRegion: () => void;
+  selectedPeriod: string;
+  setSelectedPeriod: () => void;
+  selectedIndex: string;
+  setSelectedIndex: () => void;
 }) {
   const { data: session } = useSession();
 
@@ -36,13 +43,19 @@ export default function MapControls({
     error,
   } = useLocation();
 
-  const permittedDivisions = divisions.filter(
-    (division) => division.name === session?.user.division
-  );
+  const permittedDivisions =
+    session?.user.role === "super_admin"
+      ? divisions
+      : divisions.filter(
+          (division) => division.name === session?.user.division
+        );
 
-  const permittedDistricts = districts.filter(
-    (district) => district.name === session?.user.district
-  );
+  const permittedDistricts =
+    session?.user.role === "super_admin"
+      ? districts
+      : districts.filter(
+          (district) => district.name === session?.user.district
+        );
 
   const handleDivisionChange = (value: string) => {
     const foundDivision = divisions.find((div) => div.name === value);
