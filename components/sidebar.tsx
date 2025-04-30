@@ -13,9 +13,13 @@ import {
   Binoculars,
   CloudHail,
 } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  // Fetch user role from session
+  const { data: session } = useSession();
+  const userRole = session?.user?.role || "user";
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
@@ -46,32 +50,42 @@ const Sidebar = () => {
           <SidebarLink
             href="/dashboard"
             icon={<LayoutDashboard className="w-5 h-5" />}
-            label="Dashboard"
+            label={`Dashboard (${session?.user?.role || "No Role"})`}
             isCollapsed={isCollapsed}
+            roles={["supperadmin", "stationadmin"]}
           />
+
+          {/* Visible to dataentry */}
           <SidebarLink
             href="/dashboard/first-card"
             icon={<CloudHail className="w-5 h-5" />}
             label="First Card"
             isCollapsed={isCollapsed}
+            roles={["dataentry"]}
           />
+
           <SidebarLink
             href="/dashboard/second-card"
             icon={<Binoculars className="w-5 h-5" />}
             label="Second Card"
             isCollapsed={isCollapsed}
+            roles={["dataentry"]}
           />
+
           <SidebarLink
             href="/dashboard/daily-summery"
             icon={<BarChart className="w-5 h-5" />}
-            label="Daily Summery"
+            label="Daily Summary"
             isCollapsed={isCollapsed}
+            roles={["dataentry"]}
           />
+
           <SidebarLink
             href="/dashboard/synoptic-code"
             icon={<Codesandbox className="w-5 h-5" />}
             label="Synoptic Code"
             isCollapsed={isCollapsed}
+            roles={["dataentry"]}
           />
         </nav>
       </div>
@@ -84,6 +98,7 @@ type SidebarLinkProps = {
   icon: React.ReactNode;
   label: string;
   isCollapsed: boolean;
+  roles?: string[]; // Optional prop for roles
 };
 
 const SidebarLink = ({ href, icon, label, isCollapsed }: SidebarLinkProps) => {
