@@ -1,14 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  FiSearch,
-  FiEdit2,
-  FiTrash2,
-  FiPlus,
-  FiX,
-  FiCheck,
-} from "react-icons/fi";
+import { FiSearch, FiEdit2, FiTrash2, FiX, FiCheck } from "react-icons/fi";
 
 interface User {
   id: string;
@@ -40,14 +33,13 @@ export default function UserTable() {
     upazila: "",
   });
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const res = await fetch("/api/users");
+      if (!res.ok) {
+        throw new Error("Failed to fetch users");
+      }
       const data = await res.json();
       setUsers(data);
     } catch (err) {
@@ -57,17 +49,21 @@ export default function UserTable() {
     }
   };
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   const filteredUsers = users.filter((user) => {
     const roleMatch = roleFilter === "all" || user.role === roleFilter;
     const searchMatch =
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase());
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
     return roleMatch && searchMatch;
   });
 
   const handleEdit = (user: User) => {
     setIsEditing(true);
-    setCurrentUser(user);
+    setCurrentUser({ ...user });
   };
 
   const handleUpdate = async () => {
@@ -82,13 +78,16 @@ export default function UserTable() {
         body: JSON.stringify(currentUser),
       });
 
-      if (res.ok) {
-        await fetchUsers();
-        setIsEditing(false);
-        setCurrentUser(null);
+      if (!res.ok) {
+        throw new Error("Failed to update user");
       }
+
+      await fetchUsers();
+      setIsEditing(false);
+      setCurrentUser(null);
     } catch (error) {
       console.error("Error updating user:", error);
+      alert("Failed to update user");
     }
   };
 
@@ -103,11 +102,14 @@ export default function UserTable() {
           body: JSON.stringify({ userId }),
         });
 
-        if (res.ok) {
-          await fetchUsers();
+        if (!res.ok) {
+          throw new Error("Failed to delete user");
         }
+
+        await fetchUsers();
       } catch (error) {
         console.error("Error deleting user:", error);
+        alert("Failed to delete user");
       }
     }
   };
@@ -122,23 +124,25 @@ export default function UserTable() {
         body: JSON.stringify(newUser),
       });
 
-      if (res.ok) {
-        await fetchUsers();
-        setNewUser({
-          name: "",
-          email: "",
-          role: "dataentry",
-          stationId: "",
-          division: "",
-          district: "",
-          upazila: "",
-        });
+      if (!res.ok) {
+        throw new Error("Failed to create user");
       }
+
+      await fetchUsers();
+      setNewUser({
+        name: "",
+        email: "",
+        role: "dataentry",
+        stationId: "",
+        division: "",
+        district: "",
+        upazila: "",
+      });
     } catch (error) {
       console.error("Error creating user:", error);
+      alert("Failed to create user");
     }
   };
-
   return (
     <div className="p-6 bg-white shadow rounded-lg">
       <div className="flex justify-between items-center mb-4">
@@ -177,116 +181,130 @@ export default function UserTable() {
 
       {/* Edit User Form */}
       {isEditing && currentUser && (
-        <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-          <h3 className="font-medium mb-3">Edit User</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Name
-              </label>
-              <input
-                type="text"
-                value={currentUser.name || ""}
-                onChange={(e) =>
-                  setCurrentUser({ ...currentUser, name: e.target.value })
-                }
-                className="w-full border border-gray-300 rounded-md p-2 text-sm"
-              />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-70">
+          <div className="bg-white w-full max-w-3xl mx-4 p-6 rounded-lg shadow-xl overflow-y-auto max-h-[90vh]">
+            <h3 className="text-xl font-semibold mb-4">Edit User</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={currentUser.name || ""}
+                  onChange={(e) =>
+                    setCurrentUser({ ...currentUser, name: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                />
+              </div>
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={currentUser.email}
+                  onChange={(e) =>
+                    setCurrentUser({ ...currentUser, email: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                />
+              </div>
+              {/* Role */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Role
+                </label>
+                <select
+                  value={currentUser.role}
+                  onChange={(e) =>
+                    setCurrentUser({ ...currentUser, role: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                >
+                  <option value="station_admin">Station Admin</option>
+                  <option value="data_admin">Data Entry</option>
+                </select>
+              </div>
+              {/* Station ID */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Station ID
+                </label>
+                <input
+                  type="text"
+                  value={currentUser.stationId || ""}
+                  onChange={(e) =>
+                    setCurrentUser({
+                      ...currentUser,
+                      stationId: e.target.value,
+                    })
+                  }
+                  className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                />
+              </div>
+              {/* Division */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Division
+                </label>
+                <input
+                  type="text"
+                  value={currentUser.division || ""}
+                  onChange={(e) =>
+                    setCurrentUser({ ...currentUser, division: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                />
+              </div>
+              {/* District */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  District
+                </label>
+                <input
+                  type="text"
+                  value={currentUser.district || ""}
+                  onChange={(e) =>
+                    setCurrentUser({ ...currentUser, district: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                />
+              </div>
+              {/* Upazila */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Upazila
+                </label>
+                <input
+                  type="text"
+                  value={currentUser.upazila || ""}
+                  onChange={(e) =>
+                    setCurrentUser({ ...currentUser, upazila: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                value={currentUser.email}
-                onChange={(e) =>
-                  setCurrentUser({ ...currentUser, email: e.target.value })
-                }
-                className="w-full border border-gray-300 rounded-md p-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Role
-              </label>
-              <select
-                value={currentUser.role}
-                onChange={(e) =>
-                  setCurrentUser({ ...currentUser, role: e.target.value })
-                }
-                className="w-full border border-gray-300 rounded-md p-2 text-sm"
+
+            {/* Buttons */}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="flex items-center gap-2 bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors"
               >
-                <option value="stationadmin">Station Admin</option>
-                <option value="dataentry">Data Entry</option>
-              </select>
+                <FiX /> Cancel
+              </button>
+              <button
+                onClick={handleUpdate}
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+              >
+                <FiCheck /> Update User
+              </button>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Station ID
-              </label>
-              <input
-                type="text"
-                value={currentUser.stationId || ""}
-                onChange={(e) =>
-                  setCurrentUser({ ...currentUser, stationId: e.target.value })
-                }
-                className="w-full border border-gray-300 rounded-md p-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Division
-              </label>
-              <input
-                type="text"
-                value={currentUser.division || ""}
-                onChange={(e) =>
-                  setCurrentUser({ ...currentUser, division: e.target.value })
-                }
-                className="w-full border border-gray-300 rounded-md p-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                District
-              </label>
-              <input
-                type="text"
-                value={currentUser.district || ""}
-                onChange={(e) =>
-                  setCurrentUser({ ...currentUser, district: e.target.value })
-                }
-                className="w-full border border-gray-300 rounded-md p-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Upazila
-              </label>
-              <input
-                type="text"
-                value={currentUser.upazila || ""}
-                onChange={(e) =>
-                  setCurrentUser({ ...currentUser, upazila: e.target.value })
-                }
-                className="w-full border border-gray-300 rounded-md p-2 text-sm"
-              />
-            </div>
-          </div>
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={() => setIsEditing(false)}
-              className="flex items-center gap-2 bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors"
-            >
-              <FiX /> Cancel
-            </button>
-            <button
-              onClick={handleUpdate}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-            >
-              <FiCheck /> Update User
-            </button>
           </div>
         </div>
       )}
