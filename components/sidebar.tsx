@@ -23,6 +23,46 @@ const Sidebar = () => {
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
   };
+  const role = session?.user.role;
+
+  const sidebarLinks = [
+    {
+      href: "/dashboard",
+      icon: <LayoutDashboard className="w-5 h-5" />,
+      label: `Dashboard (${session?.user?.role || "No Role"})`,
+      roles: ["super_admin", "data_admin", "station_admin"],
+    },
+    {
+      href: "/dashboard/first-card",
+      icon: <CloudHail className="w-5 h-5" />,
+      label: "First Card",
+      roles: ["super_admin", "data_admin", "station_admin"],
+    },
+    {
+      href: "/dashboard/second-card",
+      icon: <Binoculars className="w-5 h-5" />,
+      label: "Second Card",
+      roles: ["super_admin", "data_admin", "station_admin"],
+    },
+    {
+      href: "/dashboard/daily-summery",
+      icon: <BarChart className="w-5 h-5" />,
+      label: "Daily Summary",
+      roles: ["super_admin", "data_admin", "station_admin"],
+    },
+    {
+      href: "/dashboard/synoptic-code",
+      icon: <Codesandbox className="w-5 h-5" />,
+      label: "Synoptic Code",
+      roles: ["super_admin", "data_admin", "station_admin"],
+    },
+    {
+      href: "/dashboard/user",
+      icon: <Users className="w-5 h-5" />,
+      label: "User Management",
+      roles: ["super_admin"],
+    },
+  ];
 
   return (
     <div className="flex h-screen overflow-hidden shrink-0">
@@ -46,53 +86,22 @@ const Sidebar = () => {
 
         {/* Sidebar Links */}
         <nav className="flex flex-col gap-2 px-2 mt-5">
-          <SidebarLink
-            href="/dashboard"
-            icon={<LayoutDashboard className="w-5 h-5" />}
-            label={`Dashboard (${session?.user?.role || "No Role"})`}
-            isCollapsed={isCollapsed}
-            roles={["super_admin"]}
-          />
-
-          {/* Visible to dataentry */}
-          <SidebarLink
-            href="/dashboard/first-card"
-            icon={<CloudHail className="w-5 h-5" />}
-            label="First Card"
-            isCollapsed={isCollapsed}
-            roles={["super_admin", "data_admin", "station_admin"]}
-          />
-
-          <SidebarLink
-            href="/dashboard/second-card"
-            icon={<Binoculars className="w-5 h-5" />}
-            label="Second Card"
-            isCollapsed={isCollapsed}
-            roles={["super_admin", "data_admin", "station_admin"]}
-          />
-
-          <SidebarLink
-            href="/dashboard/daily-summery"
-            icon={<BarChart className="w-5 h-5" />}
-            label="Daily Summary"
-            isCollapsed={isCollapsed}
-            roles={["super_admin", "data_admin", "station_admin"]}
-          />
-
-          <SidebarLink
-            href="/dashboard/synoptic-code"
-            icon={<Codesandbox className="w-5 h-5" />}
-            label="Synoptic Code"
-            isCollapsed={isCollapsed}
-            roles={["super_admin", "data_admin", "station_admin"]}
-          />
-          <SidebarLink
-            href="/dashboard/user"
-            icon={<Users className="w-5 h-5" />}
-            label="User Management"
-            isCollapsed={isCollapsed}
-            roles={["supperadmin"]}
-          />
+          {sidebarLinks.map((link) => {
+            // Check if user's role is included in the link's roles array
+            if (link.roles.includes(role as string)) {
+              return (
+                <SidebarLink
+                  key={link.href}
+                  href={link.href}
+                  icon={link.icon}
+                  label={link.label}
+                  isCollapsed={isCollapsed}
+                  roles={link.roles}
+                />
+              );
+            }
+            return null; // Skip rendering if role doesn't match
+          })}
         </nav>
       </div>
     </div>
