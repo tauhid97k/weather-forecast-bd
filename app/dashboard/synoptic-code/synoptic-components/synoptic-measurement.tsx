@@ -5,11 +5,19 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+export interface SynopticFormValues {
+  dataType: string;
+  stationNo: string;
+  year: string;
+  month: string;
+  day: string;
+  weatherRemark: string;
+  measurements: string[];
+}
+
 export default function SynopticMeasurementsTab() {
-  const { values, errors, touched, setFieldValue } = useFormikContext<{
-    weatherRemark: string;
-    measurements: string[];
-  }>();
+  const { values, errors, touched, setFieldValue } =
+    useFormikContext<SynopticFormValues>();
 
   const measurements = [
     { id: 0, label: "C1", range: "16" },
