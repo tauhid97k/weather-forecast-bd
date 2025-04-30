@@ -93,22 +93,42 @@ export const weatherFormSchema = Yup.object({
       return !isNaN(day) && day >= 1 && day <= 31
     }),
 
+  // measurements: Yup.array()
+  //   .of(
+  //     Yup.string()
+  //       .required("This field is required")
+  //       .matches(/^[0-9]*$/, "Must contain only numbers")
+  //   )
+  //   .min(1, "At least one measurement is required")
+  //   .required("Measurements are required"),
+
   measurements: Yup.array()
-    .of(
-      Yup.string()
-        .required("This field is required")
-        .matches(/^[0-9]*$/, "Must contain only numbers")
-    )
-    .min(1, "At least one measurement is required")
-    .required("Measurements are required"),
+  .of(
+    Yup.string()
+      .nullable()
+      .matches(/^[0-9]*$/, "Must contain only numbers")
+  )
+  .min(1, "At least one measurement is required")
+  .required("Measurements are required"),
+
+
+  // meteorCodes: Yup.array()
+  //   .of(
+  //     Yup.string()
+  //       .required("Meteor code is required")
+  //   )
+  //   .min(1, "At least one meteor code is required")
+  //   .required("Meteor codes are required"),
 
   meteorCodes: Yup.array()
-    .of(
-      Yup.string()
-        .required("Meteor code is required")
-    )
-    .min(1, "At least one meteor code is required")
-    .required("Meteor codes are required"),
+  .of(
+    Yup.string()
+      .nullable()
+      .matches(/^[A-Za-z0-9]*$/, "Invalid code")
+  )
+  .min(1, "At least one meteor code is required")
+  .required("Meteor codes are required"),
+
 
   characterCodes: Yup.object().required("Character codes are required"),
 
