@@ -10,7 +10,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import type { WeatherData } from "./app/api/weather-data/route";
+
+interface WeatherData {
+  dataType: string;
+  stationNo: string;
+  year: string;
+  month: string;
+  day: string;
+  measurements: string[];
+  weatherRemark: string;
+  submittedAt: string;
+}
 
 interface WeatherDataDetailProps {
   data: WeatherData;
@@ -28,11 +38,6 @@ export function WeatherDataDetail({ data }: WeatherDataDetailProps) {
       second: "2-digit",
       timeZoneName: "short",
     }).format(date);
-  };
-
-  // Format date from year, month, day fields
-  const formatRecordDate = (year: string, month: string, day: string) => {
-    return `20${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   };
 
   // Measurement labels (simplified for this component)
@@ -96,7 +101,7 @@ export function WeatherDataDetail({ data }: WeatherDataDetailProps) {
                 <div>
                   <p className="text-sm text-gray-500">Date</p>
                   <p className="font-medium">
-                    {formatRecordDate(data.year, data.month, data.day)}
+                    20{data.year}-{data.month}-{data.day}
                   </p>
                 </div>
                 <div className="col-span-2 md:col-span-3">

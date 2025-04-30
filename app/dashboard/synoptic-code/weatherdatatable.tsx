@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -30,23 +30,254 @@ import {
   ChevronRight,
   Search,
   SlidersHorizontal,
+  Eye,
   Download,
   Calendar,
-  Loader2,
 } from "lucide-react";
-import { DateRangePicker } from "@/components/date-range-picker";
-import type { DateRange } from "react-day-picker";
-import { WeatherDataDetail } from "./weather-data-detail";
-import type { WeatherData } from "./app/api/weather-data/route";
+
+// Define the type for our weather data
+interface WeatherData {
+  dataType: string;
+  stationNo: string;
+  year: string;
+  month: string;
+  day: string;
+  measurements: string[];
+  weatherRemark: string;
+  submittedAt: string;
+}
+
+// Sample data from the JSON file
+const weatherData: WeatherData[] = [
+  {
+    dataType: "10",
+    stationNo: "12345",
+    year: "25",
+    month: "04",
+    day: "17",
+    measurements: [
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+    ],
+    weatherRemark: "Good weather overall.",
+    submittedAt: "2025-04-17T10:00:38.894Z",
+  },
+  {
+    dataType: "10",
+    stationNo: "12345",
+    year: "25",
+    month: "04",
+    day: "17",
+    measurements: [
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+    ],
+    weatherRemark: "Nice weather.",
+    submittedAt: "2025-04-17T10:02:36.892Z",
+  },
+  {
+    dataType: "12",
+    stationNo: "12345",
+    year: "25",
+    month: "04",
+    day: "30",
+    measurements: [
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+    ],
+    weatherRemark: "Hello, Good weather.",
+    submittedAt: "2025-04-30T03:27:14.136Z",
+  },
+  {
+    dataType: "12",
+    stationNo: "34567",
+    year: "89",
+    month: "10",
+    day: "11",
+    measurements: [
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+    ],
+    weatherRemark: "rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",
+    submittedAt: "2025-04-30T03:33:23.033Z",
+  },
+  {
+    dataType: "12",
+    stationNo: "34567",
+    year: "89",
+    month: "01",
+    day: "11",
+    measurements: [
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+    ],
+    weatherRemark: "gggggggggggggggggggg",
+    submittedAt: "2025-04-30T03:40:21.728Z",
+  },
+  {
+    dataType: "12",
+    stationNo: "34567",
+    year: "12",
+    month: "12",
+    day: "23",
+    measurements: [
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "100",
+      "100",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+    ],
+    weatherRemark: "good",
+    submittedAt: "2025-04-30T03:46:36.266Z",
+  },
+  {
+    dataType: "01",
+    stationNo: "25634",
+    year: "25",
+    month: "04",
+    day: "30",
+    measurements: [
+      "16",
+      "19",
+      "25",
+      "29",
+      "31",
+      "37",
+      "43",
+      "49",
+      "51",
+      "57",
+      "50",
+      "69",
+      "71",
+      "55",
+      "15",
+      "17",
+      "20",
+      "23",
+      "30",
+      "32",
+      "40",
+    ],
+    weatherRemark: "Good Weather",
+    submittedAt: "2025-04-30T04:20:35.840Z",
+  },
+];
 
 export default function WeatherDataTable() {
-  const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalRecords, setTotalRecords] = useState(0);
   const itemsPerPage = 5;
 
   // Format date for display
@@ -61,50 +292,31 @@ export default function WeatherDataTable() {
     }).format(date);
   };
 
-  // Format date from year, month, day fields
-  const formatRecordDate = (year: string, month: string, day: string) => {
+  // Format date for filtering (YYYY-MM-DD)
+  const formatDateForFilter = (year: string, month: string, day: string) => {
     return `20${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   };
 
-  // Fetch data from API
-  const fetchData = async () => {
-    try {
-      setLoading(true);
+  // Filter data based on search term
+  const filteredData = weatherData.filter((item) => {
+    const searchLower = searchTerm.toLowerCase();
+    const date = formatDateForFilter(item.year, item.month, item.day);
 
-      // Build query parameters
-      const params = new URLSearchParams();
-      if (searchTerm) params.append("search", searchTerm);
-      if (dateRange?.from) {
-        const startDate = dateRange.from.toISOString().split("T")[0];
-        params.append("startDate", startDate);
-      }
-      if (dateRange?.to) {
-        const endDate = dateRange.to.toISOString().split("T")[0];
-        params.append("endDate", endDate);
-      }
+    return (
+      item.dataType.toLowerCase().includes(searchLower) ||
+      item.stationNo.toLowerCase().includes(searchLower) ||
+      date.includes(searchLower) ||
+      item.weatherRemark.toLowerCase().includes(searchLower)
+    );
+  });
 
-      const response = await fetch(`/api/weather-data?${params.toString()}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch weather data");
-      }
-
-      const result = await response.json();
-      setWeatherData(result.data);
-      setTotalRecords(result.data.length);
-      setCurrentPage(1); // Reset to first page when data changes
-    } catch (err) {
-      console.error("Error fetching data:", err);
-      setError("Failed to load weather data. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch data on initial load and when filters change
-  useEffect(() => {
-    fetchData();
-  }, [searchTerm, dateRange]);
+  // Pagination
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = filteredData.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   // Get average of measurements
   const getAverageMeasurement = (measurements: string[]) => {
@@ -116,25 +328,6 @@ export default function WeatherDataTable() {
     return (sum / numericValues.length).toFixed(1);
   };
 
-  // Pagination
-  const totalPages = Math.ceil(totalRecords / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = weatherData.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
-
-  // Handle date range change
-  const handleDateRangeChange = (range: DateRange | undefined) => {
-    setDateRange(range);
-  };
-
-  // Clear all filters
-  const clearFilters = () => {
-    setSearchTerm("");
-    setDateRange(undefined);
-  };
-
   return (
     <Card className="w-full shadow-md border-t-4 border-t-blue-500">
       <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 pb-4">
@@ -144,9 +337,7 @@ export default function WeatherDataTable() {
               Weather Data Records
             </CardTitle>
             <CardDescription>
-              {loading
-                ? "Loading records..."
-                : `Viewing ${totalRecords} synoptic weather records`}
+              Viewing {filteredData.length} synoptic weather records
             </CardDescription>
           </div>
 
@@ -157,7 +348,10 @@ export default function WeatherDataTable() {
                 placeholder="Search records..."
                 className="pl-8 border-blue-200"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1); // Reset to first page on search
+                }}
               />
             </div>
 
@@ -168,9 +362,9 @@ export default function WeatherDataTable() {
                   <span className="hidden sm:inline">Filter</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem onClick={() => clearFilters()}>
-                  Clear All Filters
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setSearchTerm("")}>
+                  All Records
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSearchTerm("04")}>
                   April Records
@@ -182,141 +376,122 @@ export default function WeatherDataTable() {
             </DropdownMenu>
           </div>
         </div>
-
-        {/* Date Range Picker */}
-        <div className="mt-4">
-          <DateRangePicker
-            dateRange={dateRange}
-            onDateRangeChange={handleDateRangeChange}
-          />
-        </div>
       </CardHeader>
 
       <CardContent className="p-0">
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-            <span className="ml-2 text-gray-500">Loading weather data...</span>
-          </div>
-        ) : error ? (
-          <div className="text-center py-12 text-red-500">{error}</div>
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-blue-50">
-                  <TableRow>
-                    <TableHead className="w-[100px]">Date</TableHead>
-                    <TableHead>Data Type</TableHead>
-                    <TableHead>Station</TableHead>
-                    <TableHead className="hidden md:table-cell">
-                      Avg. Measurement
-                    </TableHead>
-                    <TableHead className="hidden lg:table-cell">
-                      Weather Remark
-                    </TableHead>
-                    <TableHead className="hidden md:table-cell">
-                      Submitted
-                    </TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedData.length > 0 ? (
-                    paginatedData.map((record, index) => (
-                      <TableRow key={index} className="hover:bg-blue-50/50">
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-blue-500" />
-                            <span>
-                              {formatRecordDate(
-                                record.year,
-                                record.month,
-                                record.day
-                              )}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              record.dataType === "01" ? "default" : "secondary"
-                            }
-                          >
-                            {record.dataType}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{record.stationNo}</TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {getAverageMeasurement(record.measurements)}
-                        </TableCell>
-                        <TableCell className="hidden lg:table-cell max-w-[200px] truncate">
-                          {record.weatherRemark}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell text-gray-500 text-sm">
-                          {formatDate(record.submittedAt)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <WeatherDataDetail data={record} />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              title="Download Data"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={7}
-                        className="text-center py-8 text-gray-500"
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-blue-50">
+              <TableRow>
+                <TableHead className="w-[100px]">Date</TableHead>
+                <TableHead>Data Type</TableHead>
+                <TableHead>Station</TableHead>
+                <TableHead className="hidden md:table-cell">
+                  Avg. Measurement
+                </TableHead>
+                <TableHead className="hidden lg:table-cell">
+                  Weather Remark
+                </TableHead>
+                <TableHead className="hidden md:table-cell">
+                  Submitted
+                </TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedData.length > 0 ? (
+                paginatedData.map((record, index) => (
+                  <TableRow key={index} className="hover:bg-blue-50/50">
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-blue-500" />
+                        <span>
+                          20{record.year}-{record.month}-{record.day}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          record.dataType === "01" ? "default" : "secondary"
+                        }
                       >
-                        No weather records found matching your search criteria.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                        {record.dataType}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{record.stationNo}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {getAverageMeasurement(record.measurements)}
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell max-w-[200px] truncate">
+                      {record.weatherRemark}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-gray-500 text-sm">
+                      {formatDate(record.submittedAt)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="View Details"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Download Data"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="text-center py-8 text-gray-500"
+                  >
+                    No weather records found matching your search criteria.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
-            {/* Pagination */}
-            {totalRecords > itemsPerPage && (
-              <div className="flex items-center justify-between px-4 py-4 border-t">
-                <div className="text-sm text-gray-500">
-                  Showing {startIndex + 1} to{" "}
-                  {Math.min(startIndex + itemsPerPage, totalRecords)} of{" "}
-                  {totalRecords} records
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
-                    disabled={currentPage === 1}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                    }
-                    disabled={currentPage === totalPages}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
-          </>
+        {/* Pagination */}
+        {filteredData.length > itemsPerPage && (
+          <div className="flex items-center justify-between px-4 py-4 border-t">
+            <div className="text-sm text-gray-500">
+              Showing {startIndex + 1} to{" "}
+              {Math.min(startIndex + itemsPerPage, filteredData.length)} of{" "}
+              {filteredData.length} records
+            </div>
+            <div className="flex gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>
