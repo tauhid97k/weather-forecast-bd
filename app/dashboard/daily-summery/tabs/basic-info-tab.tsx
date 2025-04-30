@@ -1,5 +1,6 @@
 "use client"
 
+import { useRef } from "react"
 import { useFormikContext } from "formik"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -13,6 +14,12 @@ export default function BasicInfoTab() {
     month: string
     day: string
   }>()
+
+  const dataTypeRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)]
+  const stationNoRefs = Array.from({ length: 5 }, () => useRef<HTMLInputElement>(null))
+  const yearRefs = Array.from({ length: 2 }, () => useRef<HTMLInputElement>(null))
+  const monthRefs = Array.from({ length: 2 }, () => useRef<HTMLInputElement>(null))
+  const dayRefs = Array.from({ length: 2 }, () => useRef<HTMLInputElement>(null))
 
   return (
     <div className="space-y-6">
@@ -53,12 +60,16 @@ export default function BasicInfoTab() {
                     key={i}
                     id={`dataType-${i}`}
                     maxLength={1}
+                    ref={dataTypeRefs[i]}
                     className="w-12 border-blue-200 focus:border-blue-500"
                     value={values.dataType.substring(i, i + 1)}
                     onChange={(e) => {
                       const newValue =
                         values.dataType.substring(0, i) + e.target.value + values.dataType.substring(i + 1)
                       setFieldValue("dataType", newValue)
+                      if (e.target.value.length === 1 && i < dataTypeRefs.length - 1) {
+                        dataTypeRefs[i + 1]?.current?.focus()
+                      }
                     }}
                   />
                 ))}
@@ -74,17 +85,21 @@ export default function BasicInfoTab() {
                 STATION NO.
               </Label>
               <div className="flex gap-1">
-                {[...Array(5)].map((_, i) => (
+                {stationNoRefs.map((ref, i) => (
                   <Input
                     key={i}
                     id={`stationNo-${i}`}
                     maxLength={1}
+                    ref={ref}
                     className="w-12 border-blue-200 focus:border-blue-500"
                     value={values.stationNo.substring(i, i + 1)}
                     onChange={(e) => {
                       const newValue =
                         values.stationNo.substring(0, i) + e.target.value + values.stationNo.substring(i + 1)
                       setFieldValue("stationNo", newValue)
+                      if (e.target.value.length === 1 && i < stationNoRefs.length - 1) {
+                        stationNoRefs[i + 1]?.current?.focus()
+                      }
                     }}
                   />
                 ))}
@@ -100,17 +115,21 @@ export default function BasicInfoTab() {
                 YEAR
               </Label>
               <div className="flex gap-1">
-                {[...Array(2)].map((_, i) => (
+                {yearRefs.map((ref, i) => (
                   <Input
                     key={i}
                     id={`year-${i}`}
                     maxLength={1}
+                    ref={ref}
                     className="w-12 border-blue-200 focus:border-blue-500"
                     value={values.year.substring(i, i + 1)}
                     onChange={(e) => {
                       const newValue =
                         values.year.substring(0, i) + e.target.value + values.year.substring(i + 1)
                       setFieldValue("year", newValue)
+                      if (e.target.value.length === 1 && i < yearRefs.length - 1) {
+                        yearRefs[i + 1]?.current?.focus()
+                      }
                     }}
                   />
                 ))}
@@ -126,17 +145,21 @@ export default function BasicInfoTab() {
                 MONTH
               </Label>
               <div className="flex gap-1">
-                {[...Array(2)].map((_, i) => (
+                {monthRefs.map((ref, i) => (
                   <Input
                     key={i}
                     id={`month-${i}`}
                     maxLength={1}
+                    ref={ref}
                     className="w-12 border-blue-200 focus:border-blue-500"
                     value={values.month.substring(i, i + 1)}
                     onChange={(e) => {
                       const newValue =
                         values.month.substring(0, i) + e.target.value + values.month.substring(i + 1)
                       setFieldValue("month", newValue)
+                      if (e.target.value.length === 1 && i < monthRefs.length - 1) {
+                        monthRefs[i + 1]?.current?.focus()
+                      }
                     }}
                   />
                 ))}
@@ -152,17 +175,21 @@ export default function BasicInfoTab() {
                 DAY
               </Label>
               <div className="flex gap-1">
-                {[...Array(2)].map((_, i) => (
+                {dayRefs.map((ref, i) => (
                   <Input
                     key={i}
                     id={`day-${i}`}
                     maxLength={1}
+                    ref={ref}
                     className="w-12 border-blue-200 focus:border-blue-500"
                     value={values.day.substring(i, i + 1)}
                     onChange={(e) => {
                       const newValue =
                         values.day.substring(0, i) + e.target.value + values.day.substring(i + 1)
                       setFieldValue("day", newValue)
+                      if (e.target.value.length === 1 && i < dayRefs.length - 1) {
+                        dayRefs[i + 1]?.current?.focus()
+                      }
                     }}
                   />
                 ))}

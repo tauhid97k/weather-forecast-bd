@@ -16,6 +16,7 @@ import SynopticMeasurementsTab from "./synoptic-components/synoptic-measurement"
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { saveSynopticCodeData } from "@/app/actions/synoptic-code-data";
+import { useRouter } from "next/navigation";
 
 // Define validation schema using Yup
 const validationSchema = Yup.object({
@@ -51,17 +52,30 @@ export default function WeatherDataForm() {
     weatherRemark: "",
   };
 
-  const handleSubmit = async (values: typeof initialValues) => {
+  const router = useRouter();
+  const [activeStep, setActiveStep] = useState<"basic-info" | "measurements">(
+    "basic-info"
+  );
+
+  const handleSubmit = async (
+    values: typeof initialValues,
+    { resetForm }: { resetForm: () => void }
+  ) => {
     try {
       setSubmitting(true);
-
-      // Call the server action to save the data
       const result = await saveSynopticCodeData(values);
-
       setSubmitResult(result);
 
       if (result.success) {
         toast.success("✅ Weather data saved successfully");
+
+        // Reset the form
+        resetForm();
+
+        // Redirect to dashboard after short delay (optional)
+        setTimeout(() => {
+          router.push("/dashboard"); // change this path as needed
+        }, 1000);
       } else {
         toast.error(result.message || "❌ Failed to save weather data");
       }
@@ -77,12 +91,19 @@ export default function WeatherDataForm() {
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={handleSubmit}
+      onSubmit={(values, actions) => handleSubmit(values, actions)}
     >
       {({ values, errors, touched, isSubmitting, resetForm }) => (
         <Form>
           <Card className="shadow-lg border-t-4 border-t-blue-500">
-            <Tabs defaultValue="basic-info" className="w-full">
+            {/* <Tabs defaultValue="basic-info" className="w-full"> */}
+            <Tabs
+              value={activeStep}
+              onValueChange={(value) =>
+                setActiveStep(value as "basic-info" | "measurements")
+              }
+              className="w-full"
+            >
               <TabsList className="w-full mx-6 p-0 h-auto bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
                 <TabsTrigger
                   value="basic-info"
@@ -139,20 +160,33 @@ export default function WeatherDataForm() {
                   >
                     Reset
                   </Button>
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting || submitting}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    {isSubmitting || submitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Submitting...
-                      </>
-                    ) : (
-                      "Submit Data"
-                    )}
-                  </Button>
+                  
+                  {activeStep === "basic-info" && (
+                    <Button
+                      type="button"
+                      onClick={() => setActiveStep("measurements")}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      Next
+                    </Button>
+                  )}
+
+                  {activeStep === "measurements" && (
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting || submitting}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {isSubmitting || submitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        "Submit Data"
+                      )}
+                    </Button>
+                  )}
                 </div>
               </CardFooter>
             </Tabs>
