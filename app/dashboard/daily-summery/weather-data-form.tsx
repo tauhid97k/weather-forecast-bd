@@ -14,6 +14,8 @@ import { useState } from "react";
 import { saveDailySummeryData } from "@/app/actions/weather-code-data";
 import { toast } from "sonner";
 import { weatherFormSchema } from "./validation-schema";
+import { useRouter } from "next/navigation";
+
 
 // Define validation schema using Yup
 const validationSchema = Yup.object({
@@ -31,6 +33,16 @@ const validationSchema = Yup.object({
 
 export default function WeatherDataForm() {
   const [submitting, setSubmitting] = useState(false);
+  const router = useRouter();
+
+  const [currentTab, setCurrentTab] = useState("basic-info");
+  const tabOrder = [
+    "basic-info",
+    "measurements",
+    "meteor-codes",
+    "character-codes",
+    "wind-direction",
+  ];
 
   const [submitResult, setSubmitResult] = useState<{
     success?: boolean;
@@ -51,17 +63,19 @@ export default function WeatherDataForm() {
     windTime: "",
   };
 
-  const handleSubmit = async (values: typeof initialValues) => {
+  const handleSubmit = async (values: typeof initialValues, { resetForm }: { resetForm: () => void }) => {
     try {
       setSubmitting(true);
-
-      // Call the server action to save the data
       const result = await saveDailySummeryData(values);
-
       setSubmitResult(result);
-
+  
       if (result.success) {
         toast.success("✅ Weather data saved successfully");
+  
+        // Reset form and go to dashboard
+        resetForm();                // clear all fields
+        setCurrentTab("basic-info"); // go to first tab
+        setTimeout(() => router.push("/dashboard"), 1000); // redirect after toast
       } else {
         toast.error(result.message || "❌ Failed to save weather data");
       }
@@ -72,17 +86,23 @@ export default function WeatherDataForm() {
       setSubmitting(false);
     }
   };
+  
 
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={weatherFormSchema}
-      onSubmit={handleSubmit}
+      onSubmit={(values, actions) => handleSubmit(values, actions)}
     >
       {({ values, errors, touched, isSubmitting }) => (
         <Form>
           <Card className="shadow-lg border-t-4 border-t-blue-500">
-            <Tabs defaultValue="basic-info" className="w-full">
+            {/* <Tabs defaultValue="basic-info" className="w-full"> */}
+            <Tabs
+              value={currentTab}
+              onValueChange={setCurrentTab}
+              className="w-full"
+            >
               <TabsList className="w-full mx-6 p-0 h-auto bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
                 <TabsTrigger
                   value="basic-info"
@@ -152,12 +172,11 @@ export default function WeatherDataForm() {
                   <WindDirectionTab />
                 </TabsContent>
               </CardContent>
-
               <CardFooter className="border-t pt-6 flex justify-between">
                 <div>
                   {Object.keys(errors).length > 0 && (
                     <p className="text-sm text-destructive">
-                      Please fill the input fields before submitting
+                      Please fill the input fields before proceeding
                     </p>
                   )}
                 </div>
@@ -165,13 +184,27 @@ export default function WeatherDataForm() {
                   <Button variant="outline" type="reset">
                     Reset
                   </Button>
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    {submitting ? "Saving..." : "Submit Data"}
-                  </Button>
+                  {currentTab !== "wind-direction" ? (
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        const currentIndex = tabOrder.indexOf(currentTab);
+                        const nextTab = tabOrder[currentIndex + 1];
+                        if (nextTab) setCurrentTab(nextTab);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Next
+                    </Button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {submitting ? "Saving..." : "Submit Data"}
+                    </Button>
+                  )}
                 </div>
               </CardFooter>
             </Tabs>
